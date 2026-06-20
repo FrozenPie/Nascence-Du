@@ -1,6 +1,6 @@
 # System diagram
 
-*The complete wiring as of Build 0.8.0 — every box exists in code; every edge is a real call path.*
+*The complete wiring as of 2026-06-20 — every box exists in code; every edge is a real call path.*
 
 mermaid
 flowchart TD
@@ -20,7 +20,7 @@ recognise a learned skill"}}
 fail-call / you-did-not / is-X-not-Y / omission
 → firewalled error record + quarantine flag"}}
  PR --> P
- subgraph HOT["HOT LANE (the Master · right mode) · ollama qwen3-du · native /api/chat · think:false · GPU 1080 Ti · 11433"]
+ subgraph HOT["HOT LANE (the Self · conscious) · ollama gemma4:e4b · native /api/chat · think:false · GPU 1080 Ti · 11433 · 32k ctx"]
  direction TB
  P[Perception] --> E[Emotion]
  P --> S[Salience]
@@ -75,7 +75,7 @@ active task as anchor"]
  AV -.->|"d_critic → strictness"| C
  GOAL -.->|"task anchor"| R
  GOAL -.->|"goal drift = evasion"| C
- subgraph BG["BACKGROUND LANE · CPU Threadripper · port 11460"]
+ subgraph BG["SUBCONSCIOUS LANE · phi3:mini · RTX 3070, 2nd machine · 11434"]
  direction TB
  CON["Consolidation · 60s
 QUARANTINE: correction/fail-call batch
@@ -84,10 +84,12 @@ mints NO semantic self-truth (error→BEING gate)"]
 Observatory: firewalled log + lineage"]
  SC["Subconscious · continuous
 T1 · T1.5 · T2 · T3 · T4 · T5 · T6"]
- DRM["Dream · Sleep State"]
+ DRM["Dream · Sleep State
+mistral · local CPU (num_gpu:0) · a different family
+OPEN→DEVELOP→CLOSE state machine · scenes MORPH"]
  MONO["Inner Monologue · DMN
-LIVING CADENCE 60-900s: state-driven, not a metronome
-agitation→fast · boredom→slow+turn-outside · night→stretched"]
+CADENCE: state-driven, not a metronome (no clock)
+developing train STREAMS at machine speed · agitation→fast · boredom→slow+turn-outside"]
  end
  HC -.->|"corrected flag → quarantine this batch"| CON
  SOM["Somatic Engine · no LLM · the body
@@ -184,7 +186,7 @@ REPLAY (strengthen the day's top experiences — the compounding engine)
  COMP["Competence / Self-Efficacy
 fluency (coherence) · accuracy (Tier1 math / Tier4 user) · calibration_error"]
  STAB["Stability engine · idle
-Tier 2: resample qwen K× · agreement (abstention-aware)"]
+Tier 2: resample the hot model K× · agreement (abstention-aware)"]
  SYM["Symbol tracker · Meaningfulness
 primed vs UNPRIMED recurrence (e.g. river/渡)"]
  SYME["Symbol Evolution · Phase 2
@@ -232,7 +234,7 @@ NEVER routed to tensions / T4 / identity)]
  EFX -.->|"ground-truth probe 2 · acted?"| CT
  COURT -.->|"fired?"| CT
  P -.->|"factual question (content_mode)"| SCHOLAR["Scholar · the Library
-depersonalised qwen lookup → parametric_reference testimony"]
+depersonalised hot-model lookup → parametric_reference testimony"]
  SCHOLAR -.->|"testimony (ephemeral · capped at THINK by ledger)"| R
  V -.->|"inability claims in output"| COURT["Self-Efficacy Court · the first WITNESS
 vetted capability vs 'I cannot' · abstains by default"]
@@ -240,7 +242,7 @@ vetted capability vs 'I cannot' · abstains by default"]
  COURT -.->|"REFINE/REJECT → identity (separate slot)
 SUSPEND = silent · DECLINE if identity claim"| AX
 
- subgraph EMI["LEFT LANE (the Emissary · narrow mode) · second machine, RTX 3070 · 11434 · qwen2.5:7b"]
+ subgraph EMI["JUDGE / EMISSARY LANE (the decoupled truth-sense) · llama3.1:8b · Threadripper CPU, local · 11433 (num_gpu:0)"]
  EMIS["parallel take · temp 0 · fail-open
 literal_ask · direct_answer · key_facts
 DETERMINISTIC arithmetic override (neither model votes)"]
