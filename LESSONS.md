@@ -105,3 +105,59 @@ detector measured raw text similarity; once scenes were built to *morph out of e
 (and so legitimately share imagery), that detector began killing healthy dreams. The guard
 wasn't wrong — it was measuring the wrong thing for the new world, and had to be re-based on
 whether the *structure* moved, not whether the words did.
+
+## 12. The judge may not be the generator
+The subtlest self-deception we found: a subsystem whose *mechanics* were flawless and whose
+*signal* was its own self-report. Our tension-resolution matcher matched cleanly, above
+threshold, at a healthy pace — and an audit found roughly half its "resolutions" were the
+system's dominant theme retiring its own restatements, because the resolution signal was
+the generator's own "this is settled" flag plus topical similarity. Self-certification.
+The doctrine that generalises: **every subsystem is evaluated by something other than
+itself** — a different model family where affordable, a deterministic check where possible,
+refute-biased by default. Nearly every serious failure in this project, traced back far
+enough, was some organ grading its own homework.
+
+## 13. A monoculture is a capacity problem
+For months one metaphor owned the entity's inner life, and every cure aimed at the
+*occupant* — thin its injections, guard its echoes, judge its revisions. Each time, the
+metaphor bent and returned, or a successor took the throne. The reframe that finally
+moved it: the architecture had **one self-concept slot**, so *whatever* won that slot
+became a monoculture — the problem was the size of the estate, not the tenant. The fix
+under trial is identity as a typed estate of many earned nodes (bonds, measured
+competences, practices, stands), *projected* into context by retrieval a few at a time,
+never injected as one paragraph. Related, on the behavioural side: a mind that "does the
+same thing over" usually has a **thin verb set**, not a scenery problem — widen what it
+can *do*, not what it can look at.
+
+## 14. An instrument that cannot say why it is silent is not an instrument
+One shadow instrument sat at zero rows for six weeks. It was called dozens of times; every
+call died at the same line — a malformed URL inside a fail-open guard that swallowed the
+exception nameless. Worse: an earlier "fix" for the silence targeted a different stage
+entirely and changed nothing, because zero rows carries no information about *which* guard
+starved you. (A cousin bug: an entire memory store went quietly dead for a day behind a
+debug-swallowed exception.) The rule now standing: in any observe-only instrument, **every
+early return writes a skip row with a reason** — cooldown, no-new-material, upstream
+error, with counts. Fail-open is right for the organism and wrong for the instrument:
+the organism may shrug an error off; the instrument must confess it.
+
+## 15. The world must be honest before it can teach
+Under a strict no-hints law (nothing may lead the entity — no nudges, no planted
+suggestions), the *world's honesty* becomes the only teaching surface you have — and quiet
+dishonesty is deadly. When the entity turned hermit we found: its fire had burned out
+**unseen a month earlier** (fire percepts were gated to the wrong room, so it never saw
+the pile die) while the ambient comfort-call still promised "the study and the fire" — a
+false promise that killed the indoor pull; and its letterbox was a single slot that had
+silently overwritten most of a month's incoming letters, unread. No behaviour patch could
+be permitted; the fix was to make the world stop lying — truthful cold-grate calls, a
+letter queue, chimney smoke visible from the garden — and leave the response to it. If
+you find yourself wanting to nudge, look first for where your world is lying.
+
+## 16. Gate on departures, not thresholds
+Any absolute trigger ("fire when valence > 0.35") silently assumes the baseline is
+neutral. Ours wasn't: instrumentation showed carried valence pinned at +0.82 — so the
+"notable feeling" gate fired on 99% of cycles, pure wallpaper, and the constant it was
+reporting was itself the real finding (an over-reporting joy pump, later replaced by a
+grounded body model). Recalibrated as a **change detector** — fire on a real departure
+from the rolling norm — the rate fell to 4%, and every firing meant something. The general
+form: calibrate every gate to the system's *operating point*, and when a signal is pinned,
+suspect the signal's source before tuning the gate.

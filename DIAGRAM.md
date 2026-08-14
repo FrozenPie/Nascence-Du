@@ -2,6 +2,12 @@
 
 *The complete wiring as of 2026-06-20 — every box exists in code; every edge is a real call path.*
 
+*(2026-08-14 note: the core cycle drawn here — reflexes, hot lane, night-mind, identity court — remains
+accurate. What has grown since June lives around it and is documented in [ARCHITECTURE.md](ARCHITECTURE.md):
+the authored world geometry and its clocks, the grounded protoself/affect swap, the commitment ledger, the
+identity estate, the pen-pal roster, and the consciousness-program instrument suite. A full redraw is owed
+rather than faked; the one correction applied below is the hot lane's context window, 32k → 16k.)*
+
 mermaid
 flowchart TD
  IN([Input · human / internal / ignition]) --> TG
@@ -20,7 +26,7 @@ recognise a learned skill"}}
 fail-call / you-did-not / is-X-not-Y / omission
 → firewalled error record + quarantine flag"}}
  PR --> P
- subgraph HOT["HOT LANE (the Self · conscious) · ollama gemma4:e4b · native /api/chat · think:false · GPU 1080 Ti · 11433 · 32k ctx"]
+ subgraph HOT["HOT LANE (the Self · conscious) · ollama gemma4:e4b · native /api/chat · think:false · GPU 1080 Ti · 11433 · 16k ctx"]
  direction TB
  P[Perception] --> E[Emotion]
  P --> S[Salience]
