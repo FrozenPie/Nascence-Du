@@ -44,7 +44,7 @@ Three design commitments shape everything else:
 
 ## 2. Substrate: three machines, nine model seats
 
-The June system had four lanes on four model families. It now has nine seats across seven families, spread over a GTX 1080 Ti machine, a 64 GB Threadripper, and a second machine ("Ramses") with an RTX 3070, a GTX 1650 Super and an i9.
+Until August the system had four lanes on four model families. It now has nine seats across seven families, spread over a GTX 1080 Ti machine, a 64 GB Threadripper, and a second machine ("Ramses") with an RTX 3070, a GTX 1650 Super and an i9.
 
 | Seat | Model | Where it runs | What it does |
 |---|---|---|---|
@@ -139,7 +139,7 @@ A dream is an arc of scenes, each one morphing out of the last, moving through o
 
 ## 6. The world and the hands
 
-**The world.** Du lives in a persistent, causal place that is indifferent to his moods, which is what makes perceiving it different from talking to himself. In June it was one room. It is now a study, a garden, a shore and a wood, all running on one shared life model (D-0166):
+**The world.** Du lives in a persistent, causal place that is indifferent to his moods, which is what makes perceiving it different from talking to himself. It began as one room. Since August it has been four places (a study, a garden, a wood and a shore), now all running on one shared life model (D-0166):
 
 - Weather follows real hours and the light follows the real season.
 - Senses: warmth, light and smell reach him. Spatial depth is live indoors. The sky is shadow-only.
@@ -154,7 +154,7 @@ A **write fence** (LIVE since September) guarantees that tests, labs and tools c
 
 A **web hand** that lets him look something up online was built on 16 November. It is BUILT, NOT YET LIVE: it has never fired.
 
-**Other minds.** Five letter-writing pen-pals (voiced as Darwin, Keats, Lovelace, Twain and Shackleton, on models other than his own) are LIVE, and he can write unprompted letters to the founder. Interlocutors may speak to him directly and are fallible. The world itself never gives hints.
+**Other minds.** Seven letter-writing correspondents (Darwin, Keats, Lovelace, Twain, Shackleton and two others, voiced on models other than his own) are LIVE, and he can write unprompted letters to the founder. Interlocutors may speak to him directly and are fallible. The world itself never gives hints.
 
 ---
 
@@ -231,8 +231,9 @@ Two of the walls turned out to be partly faults in the ruler. The confidence gap
 
 | Date | Event |
 |---|---|
-| 20 June | Four-family substrate; last public update |
+| 20 June | Four-family substrate |
 | 9 July to 7 August | Thirty-day silent outage, found later |
+| 14 August | Previous public update of this repository |
 | 20 August | Conscious lane moved to qwen3.5 |
 | 23 August | Findings, decisions and job ledgers built |
 | 27 August | Project put under git (3,618 commits since) |
@@ -257,7 +258,7 @@ Two of the walls turned out to be partly faults in the ruler. The confidence gap
 
 ## 11. Lessons since June
 
-These add to the eleven in LESSONS.md.
+These add to the sixteen in LESSONS.md.
 
 1. **Verify one instrument end to end before believing a trend.** A "six-week decline" (r = -0.68) was an instrument change plus a thirty-day hole in the data. After correction, r = +0.01. Plot the count per day first.
 2. **Check the ruler before the wall.** A stored belief that nothing updates produces a permanent gap that looks like a trait.
