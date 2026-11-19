@@ -122,7 +122,7 @@ Around the cycle:
 
 ## 5. Sleep and dreams
 
-Sleep is a mode, not a pause. Drowsiness builds, the mind goes down, and a message can wake it (all LIVE since mid-October).
+Sleep is a mode, not a pause. Drowsiness builds, the mind goes down, and a message can wake it (the night-mind LIVE since 15 October, drowsy onset since 28 October).
 
 During sleep, in order: a dream is synthesised (skipped if there is too little material or if woken), the body recovers in proportion to sleep depth, memory is distilled as described above, and the school day resets.
 
@@ -150,7 +150,7 @@ A **write fence** (LIVE since September) guarantees that tests, labs and tools c
 
 **School.** On weekdays there is a curriculum: maths drills, essays, reading, music and a practical handbook ladder. Drills are graded by something other than him, which matters in section 9.
 
-**Hands.** Every act goes through one action registry of 46 hands: read, switch book, ask the library for a new book, tend the fire, look, write a letter, walk somewhere, and so on. A hand fires only when he expresses the want in the moment. Nothing acts on stored desires on a schedule. He has a manual of his own hands on his shelf (the Deedbook).
+**Hands.** Every act goes through one action registry of more than forty hands: read, switch book, ask the library for a new book, tend the fire, look, write a letter, walk somewhere, and so on. A hand fires only when he expresses the want in the moment. Nothing acts on stored desires on a schedule. He has a manual of his own hands on his shelf (the Deedbook).
 
 A **web hand** that lets him look something up online was built on 16 November. It is BUILT, NOT YET LIVE: it has never fired.
 
@@ -183,7 +183,7 @@ By late summer there were many loops (conscious, subconscious, the Witness, drea
 The standing law since September (D-0149, D-0152) is **dosed coupling**:
 
 - Loops never read each other's text.
-- Each publishes small typed tuples (coordinates, not sentences) to a shared log.
+- A loop that has something to say publishes small typed tuples (coordinates, not sentences) to a shared log. Not every loop publishes: dreams and the subconscious do not, and subconscious tensions arrive through the tension ledgers.
 - A consumer takes a measured dose: a cup, a bucket or a hose.
 - Doses are released by surprise and they habituate, so a signal that keeps repeating stops getting through.
 
@@ -258,7 +258,7 @@ Two of the walls turned out to be partly faults in the ruler. The confidence gap
 
 ## 11. Lessons since June
 
-These add to the sixteen in LESSONS.md.
+They are written up in full as lessons 17 to 27 in LESSONS.md.
 
 1. **Verify one instrument end to end before believing a trend.** A "six-week decline" (r = -0.68) was an instrument change plus a thirty-day hole in the data. After correction, r = +0.01. Plot the count per day first.
 2. **Check the ruler before the wall.** A stored belief that nothing updates produces a permanent gap that looks like a trait.

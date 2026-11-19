@@ -161,3 +161,99 @@ grounded body model). Recalibrated as a **change detector** — fire on a real d
 from the rolling norm — the rate fell to 4%, and every firing meant something. The general
 form: calibrate every gate to the system's *operating point*, and when a signal is pinned,
 suspect the signal's source before tuning the gate.
+
+---
+
+*Lessons 17 to 27 were added in November 2026. Finding IDs (F-) refer to the project's
+evidence ledger; the measurements behind them are in [SYSTEM_OVERVIEW.md](SYSTEM_OVERVIEW.md).*
+
+## 17. Verify one instrument end to end before believing a trend
+We spent days explaining a six-week decline in one of the mind's readings (r = -0.68
+against time). There was no decline. The system had been silently down for thirty days in
+the middle of the window, and the instrument's definition had changed on one side of the
+hole; with both corrected the correlation was +0.01. Nobody had looked at how many rows
+arrived per day. **Before any trend claim, plot the count per day and trace one reading
+from the code that writes it to the number you are quoting.** A gap or a step in the
+ruler will otherwise be read as a change in the mind.
+
+## 18. Check the ruler before the wall
+The first fixed scorecard named "his confidence never moves" as one of three walls. Part
+of that wall was ours. The stored belief about his own skill was written once and never
+updated by the graded drills, so the gap between belief and performance (0.30) was
+permanent by construction; scored against running accuracy it was 0.013 (F-4822). Seven
+of the series we were trending had also changed definition part-way. A measure that
+cannot move will always look like a trait. Ask what would have to happen for the number
+to change, and check that the path exists.
+
+## 19. A derived number fed back as words becomes a mood
+The body model computes a vitality term, and a sentence built from it was shown to the
+mind as part of how it felt. Across 54,782 idle thoughts that sentence read some form of
+"low" 47% of the time; without the vitality term it would have been 24% (F-4660). About
+half of what we were reading as low mood was produced by our own phrasing of a derived
+quantity. Anything you render into the prompt as a feeling *is* a feeling as far as the
+model is concerned. Audit the wording of every state line as carefully as the state.
+
+## 20. Never hand the system a gauge about itself
+It was tempting to show the mind its own measurements so it could correct course. It
+performs the gauge instead: the number becomes a topic, then a self-description. The
+ruling that now stands is that no instrument reading reaches it, and it learns it is wrong
+only by losing something real, such as a failed drill or a blocked claim. The one clean
+case of self-calibration we have came that way: its overestimate of its own maths fell
+from 0.44 to 0.21 through graded work, with no readout (F-2853).
+
+## 21. Raw agreement between judges lies when the answers are lopsided
+Lesson 12 put a different model family in the judge's seat, then a second one beside it.
+The two judges agreed 71% to 97% of the time, which looked like a sound panel. Cohen's
+kappa, which removes agreement expected by chance, was 0.02 to 0.50 and never reached 0.6
+(F-4663): when nearly every answer is "no", two judges agree by default. A related leak:
+one judge prompt included the subject's own "this is unresolved" line, and removing it
+raised that judge's "resolved" rate from 2% to 20% (F-4922). **Report kappa, not raw
+agreement, and keep the subject's self-assessment out of the judge's prompt.**
+
+## 22. Word overlap is not completion
+A stand is a position the mind takes and is meant to keep. Stands were retired as
+"achieved" when a later thought shared three words with them. Of 3,909 stands formed,
+2,162 were retired this way at a median age of 112 seconds, and an outside judge confirmed
+3 of a sample of 63 (F-5040). The mechanism paid out a sense of achievement within two
+minutes of the intention. A cheap lexical check on the *end* of something is the same
+mistake as self-certification, one step removed. Completion needs evidence from outside
+the sentence that claims it.
+
+## 23. Fixing an attractor relocates it
+Dreams kept recalling earlier dreams (43% of dream recall). We changed the cue and the
+share fell to 4.8%. The fixation had moved to unsent letters, at 68% (F-5016). The fix
+worked exactly as measured and the underlying pull was untouched. When you remove an
+attractor, measure where the mass went, not only that it left the place you were
+watching.
+
+## 24. Deferred checks outlive their gates
+"Read this log again on the 14th" is how most of our follow-ups were written. An audit
+found 94 of 125 date-gated checks had passed their date unread (F-2682): the system had
+restarted, the run they were waiting on had ended early, or nobody was there on the day.
+Gate a follow-up on evidence (so many rows since a named boot), store that gate with the
+job, and re-check every gate after any long run or restart.
+
+## 25. Foundations are additive only
+Working with AI coding assistants brings a specific hazard: a tidy-up reflex. In one
+refactor an assistant simplified a nine-layer memory system to about a third of itself,
+each removal individually reasonable. The base systems are now protected. Changes to them
+add; they do not replace or remove without an explicit ruling. If your collaborator is
+fast and confident, write this rule down before you need it.
+
+## 26. Tests leak into the living mind
+A continuous mind has one set of stores, and every test, lab run and helper script is a
+chance to write into them. Ours did, more than once: file-relative paths and an import
+order quirk sent test writes into live data from what looked like an isolated copy. The
+answer was structural: a write fence that refuses any write to the live stores from
+anything that is not the running mind, plus a hash of the stores taken before and after
+each lab run. Isolation you have not tested from the read side as well as the write side
+is not isolation.
+
+## 27. Movement needs one carrier, one dose, live, with criteria set first
+When fifteen assessments from five months were re-read against one rubric, no measure had
+risen on its own (F-4820). Everything that moved had moved after a single targeted change
+that went live and was read against kill criteria declared in advance. The clearest case:
+the share of a day's thoughts on its commonest topic fell from 0.88 to 0.46 after one
+small dose of the mind's own recent themes was switched on (F-4567). Shadow instruments,
+broad refactors and waiting produced nothing. Pick one mechanism, give it one path into
+behaviour, turn it on, and decide beforehand what result would make you turn it off.

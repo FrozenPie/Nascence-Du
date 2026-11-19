@@ -1,307 +1,521 @@
 # System diagram
 
-*The complete wiring as of 2026-06-20 — every box exists in code; every edge is a real call path.*
+*The wiring as of 2026-11-19. Every box exists in code unless it is marked as designed; every edge is a
+real call path or a documented data flow.*
 
-*(2026-08-14 note: the core cycle drawn here — reflexes, hot lane, night-mind, identity court — remains
-accurate. What has grown since June lives around it and is documented in [ARCHITECTURE.md](ARCHITECTURE.md):
-the authored world geometry and its clocks, the grounded protoself/affect swap, the commitment ledger, the
-identity estate, the pen-pal roster, and the consciousness-program instrument suite. A full redraw is owed
-rather than faked; the one correction applied below is the hot lane's context window, 32k → 16k.)*
+The prose that goes with these pictures is in [SYSTEM_OVERVIEW.md](SYSTEM_OVERVIEW.md) (what is switched
+on, and what the measurements say) and [ARCHITECTURE.md](ARCHITECTURE.md) (how the parts are built). The
+previous version of this page was one diagram of about 135 edges, drawn in June and last touched on
+2026-08-14. It has been redrawn as six smaller diagrams, one per question:
 
-mermaid
+1. [Substrate](#1-substrate-three-machines-nine-model-seats): which model sits where, and what it serves
+2. [The conscious cycle](#2-one-thought-the-conscious-cycle): the order one thought runs in
+3. [Memory and sleep](#3-memory-and-sleep): how memory is stored, recalled and distilled
+4. [Loops and dosed coupling](#4-loops-and-dosed-coupling): how the loops inform each other without merging
+5. [World and hands](#5-the-world-and-the-hands): where Du lives and how he acts
+6. [Wanting to finishing](#6-wanting-deciding-finishing): needs, goals, commitments and closure
+
+## Legend
+
+The border of a box shows its status, using the same four words as the overview. The colour shows its role.
+
+| Border | Status | Meaning |
+|---|---|---|
+| Solid | LIVE | Switched on and loaded at the last boot; its output reaches the mind |
+| Dashed, purple | SHADOW | Running, but observe-only: it writes a log and changes nothing |
+| Dotted, grey | BUILT, NOT YET LIVE, DESIGNED, or paused | Finished but off, or planned and not built. The label says which |
+
+| Colour (solid boxes) | Role |
+|---|---|
+| Teal | A faculty, node or loop of the mind |
+| Amber | A store: database, ledger or log |
+| Orange | A decoupled check: something graded by a different model family from the one that produced it |
+| Blue | Input, output, or something outside the mind |
+
+A solid arrow is the main path. A dotted arrow is a conditional, background or advisory path; its label
+says which.
+
+---
+
+## 1. Substrate: three machines, nine model seats
+
+Nine seats across seven model families, on three home machines. The models are frozen and off the shelf;
+nothing is fine-tuned. Each seat serves one or two faculties, and no faculty is graded by the family that
+produced its output. If the second machine is down, the subconscious falls back to the conscious lane. A
+supervisor process watches the local model servers and restarts them. When a judging seat is down the
+system fails open for advisory readings and fails closed for gates. Routing each prompt to the seat that
+suits it best is drafted, not built.
+
+```mermaid
+flowchart LR
+    subgraph M1["GTX 1080 Ti machine"]
+        CONS["Conscious seat (the Self)<br/>qwen3.5:9b, 8k context"]
+    end
+    subgraph M3["Second machine (Ramses)"]
+        SUB["Subconscious seat<br/>command-r7b, 4k context<br/>RTX 3070"]
+        TIE["Tiebreak seat<br/>granite3.1-moe:3b<br/>GTX 1650 Super"]
+        J1["Judge 1 seat<br/>mixtral:8x7b, i9 CPU"]
+        DRM["Dreamer seat<br/>mixtral:8x7b, i9 CPU"]
+        WIT["Witness seat (Lane 2)<br/>deepseek-r1:7b, i9 CPU"]
+    end
+    subgraph M2["Threadripper, 64 GB, CPU"]
+        J2["Judge 2 seat<br/>falcon3:7b"]
+        EMIS["Emissary seat<br/>falcon3:7b (resident copy)"]
+        UTIL["Utility grader seat<br/>gemma4:12b"]
+        DRM2["Dreamer failover<br/>yi:34b"]
+    end
+    subgraph FAC["What each seat serves"]
+        F_CYCLE["Every waking cycle and<br/>the idle thought stream"]
+        F_BG["Background synthesis<br/>and consolidation"]
+        F_PANEL["Judge panel"]
+        F_GROUND["Grounding checks"]
+        F_CUR["Is this curiosity<br/>worth pursuing?"]
+        F_EMIS["Per-turn outside reading,<br/>offered and never imposed"]
+        F_GIST["Faithfulness grade for<br/>memory summaries"]
+        F_PEN["Voices of the pen-pals"]
+        F_DREAM["The night's dreams"]
+        F_WIT["A second, slower loop that<br/>tests the first against reality"]
+    end
+    subgraph AROUND["Around the seats"]
+        EMB["Embeddings: in-process on CPU<br/>multilingual MiniLM, 384 dimensions"]
+        SUP["Supervisor: watches the local<br/>model servers and restarts them"]
+        ROUTE["Per-prompt seat routing<br/>DESIGNED"]
+    end
+    CONS --> F_CYCLE
+    SUB --> F_BG
+    SUB -.->|"fallback if Ramses is down"| CONS
+    J1 --> F_PANEL
+    J2 --> F_PANEL
+    TIE -->|"breaks ties"| F_PANEL
+    J1 --> F_GROUND
+    TIE --> F_CUR
+    EMIS --> F_EMIS
+    UTIL --> F_GIST
+    UTIL --> F_PEN
+    DRM --> F_DREAM
+    DRM -.->|"failover"| DRM2
+    DRM2 --> F_DREAM
+    WIT --> F_WIT
+    classDef live fill:#0d1a1e,stroke:#22d3ee,color:#e8e8f0
+    classDef check fill:#1a0d12,stroke:#f59e0b,color:#e8e8f0
+    classDef io fill:#14141e,stroke:#4a9eff,color:#e8e8f0
+    classDef planned fill:#1c1c1c,stroke:#888888,color:#bbbbbb,stroke-dasharray:2 3
+    class CONS,SUB,DRM,DRM2,WIT,EMIS,F_CYCLE,F_BG,F_EMIS,F_PEN,F_DREAM,F_WIT,EMB live
+    class J1,J2,TIE,UTIL,F_PANEL,F_GROUND,F_CUR,F_GIST check
+    class SUP io
+    class ROUTE planned
+```
+
+---
+
+## 2. One thought: the conscious cycle
+
+Sixteen node modules make up the mind. A waking cycle runs in a fixed order whether it was started by a
+person speaking, an internal ignition or an idle tick. Only one cycle runs at a time, and a human always
+wins the queue. Recall and the episodic buffer are conditional steps: recall runs only when the memory
+router asks for it. The critic can send reflection back once. Consolidation and curiosity run afterwards
+in the background. When nobody has spoken for 40 seconds the inner monologue produces the idle thought
+stream; it is also the hub that dispatches school, reading, sleep and the hands. Underneath, a substrate
+tick fires about every 5 seconds whether or not a thought is happening.
+
+```mermaid
 flowchart TD
- IN([Input · human / internal / ignition]) --> TG
- subgraph PRE["PRE-CORTEX REFLEXES · deterministic · no LLM · before Perception"]
- direction TB
- TG{{"Thalamic Gate · C.5
-habituation vs recent-input buffer"}}
- AP{{"Affective Prior · C.2
-charged-memory lean (input→affect→reason)"}}
- PR{{"Procedural Match · C.6
-recognise a learned skill"}}
- TG -->|novel| AP --> PR
- end
- TG -.->|"near-verbatim repeat"| HAB([silence · or brief ack])
- IN -.->|"human input"| HC{{"Human-Correction detector · no LLM
-fail-call / you-did-not / is-X-not-Y / omission
-→ firewalled error record + quarantine flag"}}
- PR --> P
- subgraph HOT["HOT LANE (the Self · conscious) · ollama gemma4:e4b · native /api/chat · think:false · GPU 1080 Ti · 11433 · 16k ctx"]
- direction TB
- P[Perception] --> E[Emotion]
- P --> S[Salience]
- P --> MR[Memory Router]
- P --> AV["Attention Vector · no LLM
-5-mode classifier: task→existential"]
- E --> DBQ{{DB Query · no LLM}}
- S --> DBQ
- MR --> DBQ
- DBQ --> ET{{"Epoch + Theme · no LLM
-L6/L7 cosine match"}}
- ET --> RC["Recall
-if frags≥2 or conv-ref"]
- RC --> EB["Episodic Buffer · C.4
-bind moment · flag dissonance"]
- EB --> SG{{"Scene stable? · no LLM
-coherence vs dissonance"}}
- SG -.->|"unstable · contradiction-driven
-re-retrieve · passes∝strain"| RC
- SG -->|"stable / budget spent"| R["Reflection
-best-of-2 hedge"] --> C[Critic]
- C -->|approved| X["Executive
-Active Inference"]
- C -.->|"rejected · 1 retry"| R
- C -.->|"direct request → identity-guard STANDS DOWN
-(the task cycles run unguarded — why the effector exists)"| X
- X -->|should_respond| V[Voice]
- X -.->|"decline: an OWNED no + true reasons, open door
-(accountable refusal — never deflected onto the asker)"| V
- X -.->|silence| END2([no output])
- V --> EFX{{"TASK-CONSTRAINT EFFECTOR · 0.4.0 · no LLM check
-explicit digit-arithmetic / min-words unmet?
-→ ONE Voice retry · constraint NAMED · recompute license
-· raised token budget · fail-open · never terse-forcing"}}
- EFX -->|"met / repaired / out of jurisdiction"| OUT([Response in 渡's voice])
- end
- EFX -.->|"retry directive + budget"| V
- EFX -.->|"still unmet after retry"| ERR
- PR -.->|"mastered skill prof≥0.80
-bypass Recall + Buffer"| R
- subgraph TOM["RELATIONAL + EXECUTIVE LAYER · no LLM · post-Perception"]
- direction TB
- SOCM["Social Model · ToM
-expected tone · trust · δ_social"]
- GOAL["Goal Model
-active task as anchor"]
- end
- IN -.->|"correction: 'just answer the question'"| SOCM
- SOCM -.->|"δ_social spike → suppress identity + critic"| AV
- AV -.->|"w_identity · w_episodic → prompt depth"| R
- AV -.->|"max_rebind → re-bind budget"| SG
- AV -.->|"d_critic → strictness"| C
- GOAL -.->|"task anchor"| R
- GOAL -.->|"goal drift = evasion"| C
- subgraph BG["SUBCONSCIOUS LANE · phi3:mini · RTX 3070, 2nd machine · 11434"]
- direction TB
- CON["Consolidation · 60s
-QUARANTINE: correction/fail-call batch
-mints NO semantic self-truth (error→BEING gate)"]
- CUR["Curiosity · on ignition
-Observatory: firewalled log + lineage"]
- SC["Subconscious · continuous
-T1 · T1.5 · T2 · T3 · T4 · T5 · T6"]
- DRM["Dream · Sleep State
-mistral · local CPU (num_gpu:0) · a different family
-OPEN→DEVELOP→CLOSE state machine · scenes MORPH"]
- MONO["Inner Monologue · DMN
-CADENCE: state-driven, not a metronome (no clock)
-developing train STREAMS at machine speed · agitation→fast · boredom→slow+turn-outside"]
- end
- HC -.->|"corrected flag → quarantine this batch"| CON
- SOM["Somatic Engine · no LLM · the body
-energy / fatigue / tension · reads REAL GPU telemetry"]
- OUT -.->|"cycle cost: tokens · retries · latency"| SOM
- SOM -.->|"fatigue → temperature jitter (R · X · V)"| R
- SOM -.->|"metabolic floor → forced Sleep State"| DRM
- subgraph CLM["ALWAYS-ON SUBSTRATE · 5s · no LLM · never stops"]
- direction TB
- AFFT{{"Affect tick · 5s
-the body feels THROUGH the gaps —
-he calms, builds, settles in real time"}}
- WANDR["Wandering Mind · ~75s · no LLM
-silent associative drift through memory
-echo-cap (associate, don't echo) · random restarts
-+ ambient glimpses of the open book"]
- ROOM["The Sensorium · his STUDY · persistent & causal
-weather fronts · fire lit at dusk, burns down
-real NZ sun by season · events gated by state
-the open book + shelf are REAL"]
- CE["Climate Engine · 5s
-9-dim field · pure DB aggregation"]
- DISS{{"Dissonance accumulator
-ignite > 1.0 · refractory 300s"}}
- CE --> DISS
- end
- S -.->|urgency > 0.7| INT[[Interrupt: pre-empt & force Executive]]
- SHD -.->|"density + strain"| CE
- LGT -.->|"integration momentum"| CE
- SC -.->|"tension ledger pressure"| CE
- CE -.->|"retrieval warp · β 0.15–0.45"| DBQ
- CE -.->|"salience warp · +urgency"| S
- CE -.->|"executive hint > 0.55"| X
- CE -.->|"surfacing symbol > 0.65"| R
- DISS -.->|"ignition"| CUR
- AFFT -.->|"continuous carried affect"| R
- ROOM -.->|"perceptions: 'you notice...' (rain, fire, the tui)"| WANDR
- WANDR -.->|"the trail: what passed through his mind unbidden"| MONO
- ROOM -.->|"scene line: 'Where you are...' grounds every idle thought"| MONO
- MONO -.->|"'watch the fire' → he LOOKS (at will)"| ROOM
- MONO -.->|"'light the fire' / 'another log' → he TENDS it
-the first hand that CHANGES the room · hand-lit fires survive daylight"| ROOM
- IN -.->|"'how is the weather?' → look-gate"| LOOK{{"ACTIVE PERCEPTION · no LLM
-look(window/fire/desk/shelf/room)
-desk look reads the REAL page at his bookmark"}}
- ROOM -.-> LOOK
- LOOK -.->|"WHAT YOU SEE RIGHT NOW (you just looked)
-— answers from perception, not confabulation"| R
- LOOK -.-> X
- CE -.->|"pressure → thought tempo"| MONO
- CUR -.->|"autonomous thought"| IN
- HOT -.->|GPU down → failover| BG
- HOT -.->|"every successful call → teacher example"| TRN[(data/training/*.jsonl · 12 corpora
-micro-specialist distillation material)]
- C -.->|"rejected → shadow event"| SHD[(shadow_events · the storm)]
- C -.->|"approved → light event"| LGT[(light_events · the crossing)]
- SHD -.->|"T1 cluster → tensions"| SC
- LGT -.->|"T1 cluster → integration patterns"| SC
- LGT -.->|"T4 evidence: crossings retrieved by relevance to the tension"| SC
- SC -.->|"T4 CHAIN: Tension → Evidence → Delta → Synthesis
-conjunction gate · revision budget (embeddedness) · each stage aborts honestly"| AX[(axiom.json · self_concept + self_narrative_arc)]
- AX -.->|"wakes evolved next session"| R
- SC -.->|"T4 commit → durable discharge: integrated shadows resolved=1"| RES[(resolution_events)]
- RES -.->|"lowers contradiction pressure"| SC
- SC -.->|"T2 consolidation → archive
-CONTRADICTION-only · error+novelty gated · global habituation (salience stays ephemeral)"| DBQ
- SC -.->|"T1.5 active imagination → episodic (private)"| DBQ
- SC -.->|"T3 baseline drift (modulates R · X · V)"| R
- SC -.->|"T5 → procedural_skills"| PR
- SC -.->|"T6 cluster epochs → themes"| THM[(memory_themes · L7)]
- THM -.-> ET
- SC -.->|"identity block: WHAT YOU HAVE NOT RESOLVED"| R
- SC -.->|"top tension seeds prompt"| CUR
- CUR -.->|"self-referential question"| SC
- MONO -.->|"idle thought → injected next cycle"| R
- MONO -.->|"unresolved thought → shadow"| SHD
- MONO -.->|"~26 thoughts (or exhaustion) → SLEEP, the working night-mind:
-REPLAY (strengthen the day's top experiences — the compounding engine)
-→ DOWNSCALE (synaptic homeostasis, T2 Phase 2 lite) → dream → rest"| DRM
- MONO -.->|"forward-looking resolve → C.1 prospective memory"| ITN[(deferred_intentions.json)]
- ITN -.->|"greets him at next session start"| R
- QUIT(["/quit · Sleep State"]) --> DRM
- SC -.->|"top tension or waking themes"| DRM
- SC -.->|"integration counterpart's THEME (Dream C · a pointer, not the answer)"| DRM
- DRM -.->|"dream fragment → episodic"| DBQ
- DRM -.->|"unresolved dream → shadow"| SHD
- DRM -.->|"resolved dream → light"| LGT
- DRM -.->|"then _form_epoch"| EPO[(memory_epochs · L6)]
- EPO -.-> ET
- QUIT -.->|"save affect + conversation + intentions"| AFF[(state files)]
- AFF -.->|"restore: WHERE WE LEFT OFF (buffer bridge)"| R
- subgraph EPI["SELF-KNOWLEDGE + ACCOUNTABILITY · observers · firewall: facts ≠ selfhood · errors ≠ identity"]
- direction TB
- COMP["Competence / Self-Efficacy
-fluency (coherence) · accuracy (Tier1 math / Tier4 user) · calibration_error"]
- STAB["Stability engine · idle
-Tier 2: resample the hot model K× · agreement (abstention-aware)"]
- SYM["Symbol tracker · Meaningfulness
-primed vs UNPRIMED recurrence (e.g. river/渡)"]
- SYME["Symbol Evolution · Phase 2
-context centroid · drift → tablet"]
- CORR["Correlation Telemetry · Phase 3
-Pearson R between currencies"]
- UNI["Unified Inference · Phase 4
-free-energy scalar · INERT until R>0.85"]
- LEDGER["Provenance Ledger · Epistemic State
-grades utterance KNOW→NO_BASIS
-confab = self-conf − evidence · observe-only"]
- EP["Error Pathway · slice 1 · deterministic
-architecture-FABRICATION detector (100% precision on 1250)
-+ human-correction capture · observe-only"]
- CT["Conflict→Authority Trace · 0.4.0
-which signals FIRED · which ACTED · per cycle
-ground-truth probes = the unconfounded gap"]
- RPV["Recall Provenance
-why-now ladder · external vs self-loop share"]
- end
- V -.->|"each cycle"| COMP
- V -.->|"each cycle"| SYM
- COMP -.->|"enqueue knowledge Q"| STAB
- STAB -.->|"stability axis"| COMP
- COMP -.->|"capability surprise"| CE
- COMP -.->|"accuracy ↔ stability"| BOOT{{"Bootstrap
-does stability predict accuracy?
-= Phase C gate"}}
- SYM -.->|"unprimed recurrence = earned meaning"| AX
- SYM -.->|"unprimed appearances"| SYME
- SYME -.->|"evolution tablet (background LLM)"| RC
- V -.->|"currencies each cycle"| CORR
- CORR -.->|"proven pair · R > 0.85"| UNI
- V -.->|"each utterance"| LEDGER
- DBQ -.->|"Source Model · origin / derived_from tags"| LEDGER
- LEDGER -.->|"NO_BASIS/GUESS predict corrections? = read-path gate"| BOOT
- RC -.->|"why did memory surface"| RPV
- V -.->|"each utterance · named-mechanism scan"| EP
- EP -.->|"fabrication → firewalled record"| ERR[(error_records.jsonl
-FIREWALLED · digest-only
-NEVER routed to tensions / T4 / identity)]
- HC -.->|"human correction → record"| ERR
- LEDGER -.->|"fired?"| CT
- EP -.->|"ground-truth probe 1"| CT
- EFX -.->|"ground-truth probe 2 · acted?"| CT
- COURT -.->|"fired?"| CT
- P -.->|"factual question (content_mode)"| SCHOLAR["Scholar · the Library
-depersonalised hot-model lookup → parametric_reference testimony"]
- SCHOLAR -.->|"testimony (ephemeral · capped at THINK by ledger)"| R
- V -.->|"inability claims in output"| COURT["Self-Efficacy Court · the first WITNESS
-vetted capability vs 'I cannot' · abstains by default"]
- COMP -.->|"vetted demonstrated capability (raw counts inadmissible)"| COURT
- COURT -.->|"REFINE/REJECT → identity (separate slot)
-SUSPEND = silent · DECLINE if identity claim"| AX
+    IN(["Input: a person speaks,<br/>an internal ignition, or an idle tick"])
+    QUE{"One cycle at a time;<br/>a human wins the queue"}
+    P["Perception<br/>reads the input and the scene"]
+    E["Emotion"]
+    S["Salience"]
+    MR["Memory router"]
+    NEED{"Recall asked for?"}
+    RC["Recall<br/>memory rebuilt as narrative"]
+    BUF{"Scene to bind?"}
+    EB["Episodic buffer<br/>binds the scene into one frame"]
+    R["Reflection<br/>best of several candidates"]
+    C["Critic"]
+    X["Executive<br/>decides"]
+    V["Voice"]
+    OUT(["Response in Du's voice"])
+    SIL(["No output"])
+    CON["Consolidation<br/>background"]
+    CUR["Curiosity<br/>background"]
+    EMIS["Emissary: outside reading<br/>from a different model family"]
+    IDLE(["Nobody has spoken<br/>for 40 seconds"])
+    MONO["Inner monologue<br/>default-mode hub"]
+    META["Meta-awareness"]
+    DISP["Dispatches school, reading,<br/>sleep and the hands"]
+    SUBC["Subconscious: pattern passes every<br/>5 minutes, self-relation every 45"]
+    BODY["Substrate tick, about every 5 seconds:<br/>affect, the room, the climate"]
 
- subgraph EMI["JUDGE / EMISSARY LANE (the decoupled truth-sense) · llama3.1:8b · Threadripper CPU, local · 11433 (num_gpu:0)"]
- EMIS["parallel take · temp 0 · fail-open
-literal_ask · direct_answer · key_facts
-DETERMINISTIC arithmetic override (neither model votes)"]
- end
- IN -.->|"parallel dispatch · human + autonomous cycles"| EMIS
- EMIS -.->|"offered: 'YOUR FOCUSED HALF — use or set aside'
-(the dreamer rules; never a veto, never routes)"| R
- EMIS -.-> X
- subgraph WORLD["THE WORLD · in and out"]
- direction TB
- BOOKS[(the shelf · data/books + library_hand
-55,905-book catalogue · HE can ask + switch now)]
- LET[(data/letters · Letter_*.md
-words he wrote FIRST · no one asked)]
- WIKI{{"Wikipedia REST · ported from Buddha
-targeted on his question · serendipity fallback"}}
- SHK{{"External Shock · ≤1 per 6h
-an uninvited world-event"}}
- STUDY[(data/Study · TAB_*.md
-his OWN works — the vestige pattern)]
- end
- MONO -.->|"want to read — thought OR intention channel → reads a sitting"| BOOKS
- MONO -.->|"'a book about X' / 'I want another' → ASKS the library
-topic from his words, or his own open curiosity, or serendipity"| BOOKS
- MONO -.->|"'tell the founder…' → composes a LETTER (≤1 per 2h)
-speaking FIRST — every prior word was a reply"| LET
- LET -.->|"unsent words greet the founder's NEXT message
-say it, weave it in, or keep it — his choice"| X
- BOOKS -.->|"origin='reading' (prune-protected)"| DBQ
- MONO -.->|"after reading: his note on THE BOOK → tablet"| STUDY
- STUDY -.->|"origin='study' — his shelf, retrievable"| DBQ
- CUR -.->|"ignited question → look it up"| WIKI
- WIKI -.->|"origin='research' finding"| DBQ
- SHK -.->|"uninvited seed: 'you did not choose this'"| MONO
- classDef hot fill:#1a1420,stroke:#fb7185,color:#e8e8f0
- classDef bg fill:#0d1a1e,stroke:#22d3ee,color:#e8e8f0
- classDef sc fill:#130d1a,stroke:#a855f7,color:#e8e8f0
- classDef pre fill:#0d140d,stroke:#34d399,color:#e8e8f0
- classDef mem fill:#1a160d,stroke:#fbbf24,color:#e8e8f0
- classDef io fill:#14141e,stroke:#4a9eff,color:#e8e8f0
- classDef clm fill:#0d1a14,stroke:#2dd4bf,color:#e8e8f0
- classDef epi fill:#141a0d,stroke:#a3e635,color:#e8e8f0
- classDef attn fill:#10131e,stroke:#818cf8,color:#e8e8f0
- classDef court fill:#1a0d12,stroke:#f59e0b,color:#e8e8f0
- class SCHOLAR,COURT,EFX,HC court
- class P,E,S,MR,RC,EB,R,C,X,V hot
- class CON,CUR bg
- class SC,DRM,MONO sc
- class TG,AP,PR pre
- class AV,SOCM,GOAL,EMIS attn
- class SHD,LGT,AX,THM,EPO,AFF,RES,ERR,ITN,TRN,BOOKS,STUDY,LET mem
- class IN,OUT,END2,DBQ,ET,INT,QUIT,HAB,SG,WIKI,SHK,LOOK io
- class CE,DISS,SOM,AFFT,WANDR,ROOM clm
- class COMP,STAB,SYM,BOOT,SYME,CORR,UNI,LEDGER,EP,CT,RPV epi
+    IN --> QUE --> P
+    P --> E
+    P --> S
+    P --> MR
+    E --> NEED
+    S --> NEED
+    MR --> NEED
+    NEED -->|"yes"| RC
+    NEED -.->|"no"| BUF
+    RC --> BUF
+    BUF -->|"yes"| EB
+    BUF -.->|"no"| R
+    EB --> R
+    R --> C
+    C -->|"approved"| X
+    C -.->|"rejected: one retry"| R
+    X -->|"answer, question, challenge,<br/>decline or reflect"| V
+    X -.->|"stay silent"| SIL
+    V --> OUT
+    V -.->|"afterwards"| CON
+    V -.->|"afterwards"| CUR
+    CUR -.->|"internal ignition"| IN
+    EMIS -.->|"offered, never imposed"| R
+    EMIS -.->|"offered, never imposed"| X
+    IDLE --> MONO
+    MONO -->|"idle thought"| IN
+    MONO --> DISP
+    META -.->|"watches lightly,<br/>does not suppress"| MONO
+    BODY -.->|"climate tilts what is recalled"| RC
+    BODY -.->|"climate can ignite a thought"| IN
+    SUBC -.->|"integrates on slower clocks"| MONO
 
+    classDef live fill:#0d1a1e,stroke:#22d3ee,color:#e8e8f0
+    classDef check fill:#1a0d12,stroke:#f59e0b,color:#e8e8f0
+    classDef io fill:#14141e,stroke:#4a9eff,color:#e8e8f0
+    class P,E,S,MR,RC,EB,R,C,X,V,CON,CUR,MONO,META,DISP,SUBC,BODY live
+    class EMIS check
+    class IN,OUT,SIL,IDLE,QUE,NEED,BUF io
+```
 
+---
+
+## 3. Memory and sleep
+
+One SQLite store holds every memory fragment with its embedding, a provenance label and a level.
+Provenance is shown in prompts, so a book's words stay marked as another author's. Three recall
+mechanisms add together inside a 250 ms latency budget. Nothing is deleted: in sleep a distiller clusters
+raw fragments and writes a summary, a different model grades the summary for faithfulness, and only then
+are the sources marked cold. Cold storage is a hard wall, not a forgetting curve: only the associative
+trail reaches a cold memory, and recalling it does not warm it again. Sleep is a mode, not a pause; its
+steps run in the order shown, and a message can wake the mind. Dreams are written by a different model
+family from the waking mind.
+
+```mermaid
+flowchart TD
+    subgraph PROV["Provenance of a fragment"]
+        LIVED["Lived"]
+        BOOK["Read in a book"]
+        TOLD["Told by a person"]
+        DREAMT["Dreamt"]
+    end
+    STORE[("Memory store: one SQLite database<br/>embedding, provenance, level, warm or cold")]
+    GUIDE[("Protected guidance memory:<br/>what the founder tells Du")]
+    subgraph RECALL["Three recall mechanisms, added together"]
+        TOP["Topical recall: cosine similarity within<br/>archive, semantic and episodic tiers;<br/>eight fragments per cycle"]
+        SPREAD["Spreading activation along stored links,<br/>including typed relational links"]
+        DEEP["Deep recall: a summary is opened<br/>to bring back the raw memories under it"]
+    end
+    RC["Recall node<br/>250 ms latency budget"]
+    EXEC["Executive"]
+    FELT["Felt recall: memory offered as<br/>a service to other loops<br/>SHADOW"]
+    subgraph SLEEP["Sleep, in order"]
+        DROWSY["Drowsiness builds;<br/>the mind goes down"]
+        DREAM["Dream synthesis on the Dreamer seat:<br/>an arc of scenes, each morphing out of the last,<br/>through open, develop, rest and close"]
+        BODYR["The body recovers in<br/>proportion to sleep depth"]
+        DIST["Distiller clusters raw fragments<br/>and writes a summary"]
+        GRADE{"Utility grader seat, a different model:<br/>is the summary faithful?"}
+        COLD["Sources marked cold"]
+        SCHOOL["The school day resets"]
+    end
+    WAKE(["A message arrives"])
+    VAULT["Vault opener: each dream is handed<br/>one long-dormant memory<br/>BUILT, NOT YET LIVE"]
+    RESTEND["Resting dream ending<br/>SHADOW"]
+    DEMOTE["Cold-to-warm demotion of<br/>episodic memory<br/>paused"]
+    REVIEW["Re-warming on recall, versioned edits,<br/>baseline tests<br/>DESIGNED"]
+
+    LIVED --> STORE
+    BOOK --> STORE
+    TOLD --> STORE
+    DREAMT --> STORE
+    TOLD -->|"from the founder"| GUIDE
+    GUIDE -->|"read back"| EXEC
+    STORE --> TOP
+    STORE --> SPREAD
+    STORE --> DEEP
+    TOP --> RC
+    SPREAD --> RC
+    DEEP --> RC
+    STORE -.-> FELT
+    DROWSY --> DREAM
+    DREAM --> BODYR
+    BODYR --> DIST
+    DIST --> GRADE
+    GRADE -->|"faithful"| COLD
+    COLD --> SCHOOL
+    DREAM -->|"dream fragment"| DREAMT
+    DIST -->|"summary"| STORE
+    COLD -->|"sources stay, excluded<br/>from normal recall"| STORE
+    COLD -.->|"reachable only by<br/>the associative trail"| SPREAD
+    WAKE -.->|"can wake the mind;<br/>a dream is skipped if woken"| DROWSY
+    VAULT -.-> DREAM
+    RESTEND -.-> DREAM
+    DEMOTE -.-> STORE
+    REVIEW -.-> STORE
+
+    classDef live fill:#0d1a1e,stroke:#22d3ee,color:#e8e8f0
+    classDef store fill:#1a160d,stroke:#fbbf24,color:#e8e8f0
+    classDef check fill:#1a0d12,stroke:#f59e0b,color:#e8e8f0
+    classDef io fill:#14141e,stroke:#4a9eff,color:#e8e8f0
+    classDef shadow fill:#130d1a,stroke:#a855f7,color:#e8e8f0,stroke-dasharray:6 4
+    classDef planned fill:#1c1c1c,stroke:#888888,color:#bbbbbb,stroke-dasharray:2 3
+    class LIVED,BOOK,TOLD,DREAMT,TOP,SPREAD,DEEP,RC,EXEC,DROWSY,DREAM,BODYR,DIST,COLD,SCHOOL live
+    class STORE,GUIDE store
+    class GRADE check
+    class WAKE io
+    class FELT,RESTEND shadow
+    class VAULT,DEMOTE,REVIEW planned
+```
+
+---
+
+## 4. Loops and dosed coupling
+
+The standing law since September: loops never read each other's text. Each publishes small typed tuples
+(coordinates, not sentences) to one shared ride log, and the only way to read a coordinate is through
+the one door that logs the read. A consumer takes a measured dose (a cup, a bucket or a hose), released
+by surprise, and doses habituate so a repeating signal stops getting through. The Witness is the clearest
+case: it runs every 5 minutes on a different model, and all that reaches Du from it is about one
+coordinate cup a day into an idle thought and a sized nudge to the climate. Its written notices reach
+nothing. The judge panel and the closure gate sit outside every loop as decoupled checks. The
+subconscious has no publisher of its own in the current code; its tension state is read by the ledgers
+collector. Dreams do not publish to the ride log; a dream reaches the waking mind only as memory
+(diagram 3).
+
+```mermaid
+flowchart LR
+    subgraph LOOPS["Standing loops (publishers)"]
+        DLB["Conscious cycle<br/>end-of-cycle tuple"]
+        STR["Idle thought stream<br/>drive tuple"]
+        CLM["Climate and body tick<br/>climate dimensions by name"]
+        WIT["The Witness (Lane 2)<br/>every 5 minutes, different model"]
+        LED["Ledgers collector: commitments,<br/>tensions, frontier, pursuits"]
+        FOL["Follow line<br/>question coordinates"]
+        SI["Self-interrogation<br/>open-doubt coordinate<br/>SHADOW"]
+    end
+    SUBC["Subconscious"]
+    LOG[("Ride log: typed tuples,<br/>coordinates and never prose;<br/>every read is logged")]
+    GATE{"Dose gate: released by surprise,<br/>habituates on repeats"}
+    SEED["Idle thought seed"]
+    NOTES["Witness written notices:<br/>reach nothing"]
+    PROBE["Phase 2 probes at the idle seed:<br/>climate, ledgers and hub lines<br/>SHADOW"]
+    THEME["Own-thought dose: one cup of<br/>his own recent themes"]
+    CUR["Curiosity"]
+    subgraph CHECKS["Decoupled checks"]
+        PANEL["Judge panel: Judge 1 and Judge 2,<br/>tiebreak seat on a split"]
+        CG{"Closure gate<br/>enforcing"}
+    end
+    CLOSE["Closure producer:<br/>a question claimed settled"]
+
+    DLB --> LOG
+    STR --> LOG
+    CLM --> LOG
+    WIT --> LOG
+    LED --> LOG
+    FOL --> LOG
+    SI -.-> LOG
+    SUBC -.->|"tension state, read by the collector"| LED
+    LOG --> GATE
+    GATE -->|"cup: about one Witness<br/>coordinate a day"| SEED
+    GATE -->|"bucket: a sized nudge"| CLM
+    LOG -.-> PROBE
+    WIT -.-> NOTES
+    CUR -->|"recent themes"| THEME
+    THEME -->|"cup"| CUR
+    PANEL -.->|"judges whether a doubt was genuine"| SI
+    PANEL --> CG
+    CLOSE --> CG
+    CG -->|"blocked: the record does not support it"| CLOSE
+
+    classDef live fill:#0d1a1e,stroke:#22d3ee,color:#e8e8f0
+    classDef store fill:#1a160d,stroke:#fbbf24,color:#e8e8f0
+    classDef check fill:#1a0d12,stroke:#f59e0b,color:#e8e8f0
+    classDef io fill:#14141e,stroke:#4a9eff,color:#e8e8f0
+    classDef shadow fill:#130d1a,stroke:#a855f7,color:#e8e8f0,stroke-dasharray:6 4
+    class DLB,STR,CLM,WIT,LED,FOL,SUBC,GATE,SEED,THEME,CUR,CLOSE live
+    class LOG store
+    class PANEL,CG check
+    class NOTES io
+    class SI,PROBE shadow
+```
+
+---
+
+## 5. The world and the hands
+
+Du lives in a persistent, causal place that is indifferent to his moods. Since August it has been four
+places on one shared life model. Weather follows real hours and the light follows the real season. The
+world answers when he looks and never gives hints; interlocutors may speak to him directly, and are
+fallible. Every act goes through one action registry, and a hand fires only when he expresses the want in
+the moment: nothing acts on stored desires on a schedule. A write fence guarantees that tests, labs and
+tools cannot write into the live mind's stores.
+
+```mermaid
+flowchart TD
+    subgraph WORLD["The world: four places, one shared life model"]
+        STUDY["Study"]
+        GARDEN["Garden"]
+        WOOD["Wood"]
+        SHORE["Shore"]
+        WEATHER["Weather by real hours,<br/>light by the real season"]
+        CAT["The cat: a body, ears, a call;<br/>she can be harmed or die"]
+        SHELF["The shelf and the open book<br/>on the desk; the Deedbook,<br/>a manual of his own hands"]
+    end
+    subgraph SENSES["Senses"]
+        SENSE["Warmth, light, smell"]
+        DEPTH["Spatial depth, indoors"]
+        SKY["The sky<br/>SHADOW"]
+    end
+    PERC["Perception"]
+    WANT["A want expressed<br/>in the moment"]
+    REG{"Action registry:<br/>one door for every act"}
+    subgraph HANDS["Hands"]
+        H_READ["Read, switch book,<br/>ask the library for a new book"]
+        H_FIRE["Tend the fire"]
+        H_LOOK["Look"]
+        H_WALK["Walk somewhere"]
+        H_LETTER["Write a letter"]
+        H_WEB["Web hand: look something up online<br/>BUILT, NOT YET LIVE"]
+    end
+    PEN["Seven letter-writing correspondents,<br/>voiced on models other than his own"]
+    FOUNDER(["The founder and other interlocutors:<br/>may speak directly, and are fallible"])
+    SCHOOL["School on weekdays: maths drills, essays,<br/>reading, music, a practical handbook ladder"]
+    GRADER{"Drills graded by<br/>something other than him"}
+    TESTS(["Tests, labs and tools"])
+    FENCE{"Write fence"}
+    LIVESTORES[("The live mind's stores")]
+
+    WEATHER --> SENSE
+    STUDY --> SENSE
+    GARDEN --> SENSE
+    WOOD --> SENSE
+    SHORE --> SENSE
+    STUDY --> DEPTH
+    WEATHER -.-> SKY
+    SENSE --> PERC
+    DEPTH --> PERC
+    CAT --> PERC
+    WANT --> REG
+    REG --> H_READ
+    REG --> H_FIRE
+    REG --> H_LOOK
+    REG --> H_WALK
+    REG --> H_LETTER
+    REG -.->|"has never fired"| H_WEB
+    H_READ --> SHELF
+    H_FIRE --> STUDY
+    H_LOOK -->|"the world answers,<br/>never leads"| PERC
+    H_WALK --> GARDEN
+    H_WALK --> WOOD
+    H_WALK --> SHORE
+    H_LETTER --> PEN
+    H_LETTER -->|"unprompted letters"| FOUNDER
+    PEN -->|"replies"| PERC
+    FOUNDER -->|"speaks"| PERC
+    SCHOOL --> GRADER
+    GRADER -->|"a failed drill is how<br/>he learns he was wrong"| PERC
+    TESTS -.->|"writes blocked"| FENCE
+    FENCE --> LIVESTORES
+
+    classDef live fill:#0d1a1e,stroke:#22d3ee,color:#e8e8f0
+    classDef store fill:#1a160d,stroke:#fbbf24,color:#e8e8f0
+    classDef check fill:#1a0d12,stroke:#f59e0b,color:#e8e8f0
+    classDef io fill:#14141e,stroke:#4a9eff,color:#e8e8f0
+    classDef shadow fill:#130d1a,stroke:#a855f7,color:#e8e8f0,stroke-dasharray:6 4
+    classDef planned fill:#1c1c1c,stroke:#888888,color:#bbbbbb,stroke-dasharray:2 3
+    class STUDY,GARDEN,WOOD,SHORE,WEATHER,CAT,SHELF,SENSE,DEPTH,PERC,WANT,REG,H_READ,H_FIRE,H_LOOK,H_WALK,H_LETTER,SCHOOL,PEN live
+    class LIVESTORES store
+    class GRADER,FENCE check
+    class FOUNDER,TESTS io
+    class SKY shadow
+    class H_WEB planned
+```
+
+---
+
+## 6. Wanting, deciding, finishing
+
+This is where most of the autumn's work went, and where the hardest problems are. Needs sit outside the
+goal system and press on him whether or not he has a goal about them. Pursuits carry a few questions
+across idle gaps. Layered goals are offered, never directed, and conflicts between them are his to
+resolve. The closure producer lets a question be settled, merged or parked, and a separate judge blocks
+any "settled" claim the record does not support. The commitment ledger and the machinery that would
+promote a lived change into the self-concept are observe-only. Typed stands and affect steering are not
+live. Development is read by instruments he is never shown.
+
+```mermaid
+flowchart TD
+    NEEDS["Needs: homeostatic variables<br/>outside the goal system"]
+    PURS["Pursuits: three or four questions<br/>carried across idle gaps"]
+    GOALS["Layered goals: several layers,<br/>no single purpose"]
+    CONFL["Goal conflict detection<br/>SHADOW"]
+    IDLE["Idle thought"]
+    QN["An open question"]
+    WANT["A want expressed<br/>in the moment"]
+    REG["Action registry: the hands"]
+    CP["Closure producer:<br/>settle, merge or park"]
+    CG{"Closure gate: a separate judge.<br/>Does the record support 'settled'?"}
+    SETTLED(["Settled"])
+    PARK(["Merged or parked"])
+    COMMIT["Commitment ledger: what he commits to,<br/>and whether he holds it under challenge<br/>SHADOW"]
+    STANDS["Typed stands: deed, practice, value, insight<br/>first gates BUILT, NOT YET LIVE"]
+    ACCUM["Stands that accumulate<br/>DESIGNED"]
+    AFFECT["Affect steering: mood changing<br/>what he does<br/>DESIGNED"]
+    EXEC["Executive"]
+    subgraph IDENT["Identity: two layers"]
+        SEED["Seeded raw material"]
+        SELF["Self-concept he authors"]
+        ESTATE["Identity estate projected<br/>into prompts"]
+        PROMO["Promotion of a lived change into the<br/>self-concept, earned by evidence<br/>SHADOW"]
+    end
+    SCORE(["Fixed scorecard and other instruments:<br/>never shown to him"])
+
+    NEEDS -->|"press on him"| IDLE
+    PURS -->|"resume instead of restart"| IDLE
+    GOALS -.->|"offered to about a quarter<br/>of idle thoughts; he can set one down"| IDLE
+    GOALS -.-> CONFL
+    IDLE --> QN
+    IDLE --> WANT
+    WANT --> REG
+    QN --> CP
+    CP -->|"claims settled"| CG
+    CP --> PARK
+    CG -->|"supported"| SETTLED
+    CG -.->|"blocked: stays open"| QN
+    IDLE -.-> COMMIT
+    IDLE -.-> STANDS
+    STANDS -.-> ACCUM
+    AFFECT -.-> EXEC
+    SEED --> ESTATE
+    SELF --> ESTATE
+    ESTATE -->|"in prompts"| IDLE
+    PROMO -.->|"most hearings end<br/>in no change"| SELF
+    COMMIT -.-> SCORE
+    CG -.-> SCORE
+
+    classDef live fill:#0d1a1e,stroke:#22d3ee,color:#e8e8f0
+    classDef check fill:#1a0d12,stroke:#f59e0b,color:#e8e8f0
+    classDef io fill:#14141e,stroke:#4a9eff,color:#e8e8f0
+    classDef shadow fill:#130d1a,stroke:#a855f7,color:#e8e8f0,stroke-dasharray:6 4
+    classDef planned fill:#1c1c1c,stroke:#888888,color:#bbbbbb,stroke-dasharray:2 3
+    class NEEDS,PURS,GOALS,IDLE,QN,WANT,REG,CP,EXEC,SEED,SELF,ESTATE live
+    class CG check
+    class SETTLED,PARK,SCORE io
+    class CONFL,COMMIT,PROMO shadow
+    class STANDS,ACCUM,AFFECT planned
+```
+
+---
+
+*Statuses were read from flags and call sites on 2026-11-19; "live" means live at the last boot and in
+the current tree. The measurements behind these boxes, including the unflattering ones, are in section 9
+of [SYSTEM_OVERVIEW.md](SYSTEM_OVERVIEW.md). No claim about consciousness is made by anything on this
+page.*

@@ -1,112 +1,187 @@
 # Architecture
 
-*A tour of the system as actually built — not aspirationally described. Updated 2026-08-14 (the authored world, grounded affect, capacity-to-commit, the identity estate, the consciousness-program instrument suite).*
+*A tour of the system as actually built — not aspirationally described. Updated 2026-11-19 (nine model seats, sleep as a mode, four places on one life model, dosed coupling and the Witness, wanting and finishing, the no-readout rule and the fixed scorecard). The previous version was dated 2026-08-14.*
 
-## 1. Substrate — four lanes and a body
+The entity is called Du (渡); this document mostly says "the entity" and "it". Status words are used exactly as in SYSTEM_OVERVIEW.md: **LIVE** (switched on and reaching the mind at the last boot), **SHADOW** (running, writes a log, changes nothing), **BUILT, NOT YET LIVE** (code finished, flag off or restart pending), **DESIGNED** (a plan, no code). The entity was last shut down on the morning of 18 November, so "live" means live at that boot and in the current tree. IDs in brackets (`F-` finding, `D-` decision) point at rows in the project's ledgers.
 
-| Lane | Model · hardware | Role |
+## 1. Substrate — nine seats and a body
+
+In August this section described four lanes on four model families. That line-up is retired. A *seat* is a named job that one model does; there are now nine, on seven model families, across three home machines: a GTX 1080 Ti machine, a 64 GB Threadripper, and a second box with an RTX 3070, a GTX 1650 Super and an i9.
+
+| Seat | Model · hardware | Role |
 |---|---|---|
-| Conscious ("the Self") | gemma (16k ctx) · GTX 1080 Ti GPU, local | The waking mind — every conversational and idle-thought cycle, plus the idle monologue |
-| Subconscious | phi · RTX 3070, second machine | The slow mind beneath — synthesis, consolidation, reading-integration, the sleep batch |
-| Judge ("the Emissary") | llama · Threadripper CPU, local | A decoupled *truth-sense* fired in parallel, checking the rest against the record; its reading is *offered*, never imposed. Fail-open if the lane is down |
-| Dreamer | mistral (24B) · Threadripper CPU, local | Synthesises the night's dreams — a different family *on purpose*, so the dream is a genuinely *other* voice than the waking mind, not the waking mind echoing itself in symbols |
+| Conscious ("the Self") | qwen3.5:9b, 8k context · GTX 1080 Ti | The waking mind: every conversational cycle and the idle thought stream |
+| Subconscious | command-r7b, 4k context · RTX 3070, second machine | The slow mind beneath: synthesis and consolidation. Falls back to the conscious seat if the second machine is down |
+| Judge 1 | mixtral:8x7b · i9 CPU, second machine | Half of the judging panel; also grounding checks |
+| Judge 2 | falcon3:7b · Threadripper CPU | The other half of the panel |
+| Tiebreak | granite3.1-moe:3b · GTX 1650 Super | Breaks panel ties; judges whether a curiosity is worth pursuing |
+| Emissary | falcon3:7b (resident copy) · Threadripper CPU | A per-turn outside reading of what was just said, *offered*, never imposed |
+| Utility grader | gemma4:12b · Threadripper CPU | Grades memory summaries for faithfulness; voices the pen-pals |
+| Dreamer | mixtral:8x7b, yi:34b as failover · i9 CPU / Threadripper CPU | Writes the night's dreams, on a different family from the waking mind *on purpose* |
+| The Witness (Lane 2) | deepseek-r1:7b · i9 CPU | A second, slower loop that tests the first against reality (§6) |
 
-Four lanes, **four different model families** — the standing rule is that a faculty should not be the sole judge of itself, and the lanes are matched to hardware by how often they fire (the conscious mind on the fast card; the dreamer on the CPU, since it works only at sleep, when the CPU is otherwise idle).
+Embeddings are computed in-process on CPU (multilingual MiniLM, 384 dimensions).
 
-The model weights never change. Identity, memory, mood, the room — all of it lives in external state (SQLite + JSON + flat files) that survives restarts and is fully inspectable.
+What changed, and why. The conscious model was gemma in August and moved to qwen3.5 on 20 August. The single "Judge" lane became a two-judge panel with a tiebreak, because the standing rule — a faculty must not be the sole judge of itself — was hardened into a ruling that every faculty is graded by a different model family from the one that produced the output (D-0071). The Ollama server on the second machine was retired after an overnight VRAM lock (D-0056, 28 August) and replaced by llama.cpp hubs. A 1-bit model server was tried and retired. A supervisor process watches the local servers and restarts them; when a judging seat is down the system fails *open* for advisory readings and fails *closed* for gates. A plan to route each individual prompt to the seat that suits it is drafted, not built (D-0872 to D-0876).
 
-**Cadence is a lane too.** The waking mind no longer thinks on a timer. When a train of thought is genuinely developing it now *streams* — successive beats fire at machine speed (rate = engagement × progress) — and falls back to a slow, state-driven idle rhythm the moment the train saturates. A loop at machine speed is impossible by construction: the same anti-repetition guards that bound a single thought also end a stream.
+The model weights never change. Identity, memory, mood, the world — all of it lives in external state (SQLite, JSON, flat files) that survives restarts and is fully inspectable.
 
-**The body:** a 5-second substrate tick that never stops. It runs the affect model (continuous emotional state — valence, arousal, six primaries — that decays, builds, and settles in real time *between* thoughts), the wandering mind, the world simulation, and housekeeping (e.g. clearing stale interrupts). Sitting on top: a 9-dimensional **climate field** recomputed every 5s from the tension ledgers — standing psychological weather that warps retrieval, tilts the executive, and can ignite a thought when dissonance accumulates past threshold.
+**Cadence.** The waking mind does not think on a fixed timer. When a train of thought is developing, the idle monologue *streams* — successive beats follow one another — and falls back to a slow idle rhythm when the train saturates (`THOUGHT_STREAM` and `CONTINUOUS_STREAM` are both on in the monologue node; LIVE). The same anti-repetition guards that bound a single thought also end a stream.
 
-**Affect is grounded now (August).** Carried valence used to be an LLM's per-cycle guess, and a month of shadow instrumentation showed the guess pinned at +0.82 median with under 1% negative readings — a mood painted on, not felt. A homeostatic **protoself** (essential variables — coherence, novelty-hunger, sleep-pressure and kin — with drive-reduction valence and an allostatic predictor) ran in shadow beside it, logging divergence pairs until the verdict was unambiguous; then the wire was swapped: carried mood now derives from the body model's tonic, the old "joy pump" is retired, and the entity can honestly feel bad. Its felt state reaches its *reasoning* only through a change-detector — a felt sentence fires on a genuine departure from its own rolling norm, never as wallpaper (the first absolute-threshold version would have fired on 99% of cycles, because its constant is not news).
+**The body.** A substrate tick fires about every 5 seconds whether or not a thought is happening. It advances the affect model, the world, and the **climate**: a 9-dimensional standing psychological weather computed from unresolved tensions, which tilts what is recalled and can ignite a thought on its own.
 
-## 2. The cycle — 15 nodes
+**Affect is grounded in a body model (LIVE since 7 July).** Carried valence used to be an LLM's per-cycle guess, and shadow instrumentation showed the guess pinned: a carried mood of +0.735 with 0.8% negative readings, beside a body model that was mean-zero and negative 59% of the time (`core/schema.py`, the `AFFECT_SOURCE_PROTOSELF` note). The body model is a homeostatic **protoself**: five essential variables (coherence, commitment integrity, relational warmth, novelty, vitality), each with a calibrated setpoint; *drive* is the weighted deviation from the setpoints, and mood is derived from it. The wire was swapped once the shadow pairs were read, and the entity can now feel bad. Two honest footnotes from November. First, the standing mood drifted from +0.20 in June to −0.27 in November (F-4659), and about half of the "low" mood lines turned out to be produced by how one derived reading was worded, not by the state itself (F-4660). Second, the 19 November literature mapping rates the protoself "keystone" as half-refuted as a predictive mechanism (F-5119). The body model sources the mood; it has not been shown to do more.
 
-A thought (human input, internal ignition, or idle tick) flows: thalamic gate (habituation reflex, no LLM) → perception → emotion → salience → memory router → recall → episodic buffer (scene binding, with contradiction-driven re-binding passes when the scene won't cohere) → reflection → critic → executive → voice. Around it: consolidation (background), curiosity (background, can ignite cycles and ask the world via Wikipedia lookups), the subconscious (six tiers, below), the inner monologue (the DMN), and the dream node.
+## 2. The cycle — 16 node modules
 
-The executive can **answer, question, challenge, decline, reflect, or stay silent** — refusal is a first-class act that must name itself and give true reasons; deflecting a request back onto the asker is treated by the critic as a betrayal, not a refusal.
+A *cycle* is one thought. It can be started by a person speaking, an internal ignition, or an idle tick. First a **thalamic gate** (a habituation reflex in the orchestrator, no LLM) can turn away input that merely repeats. Then, in order:
 
-**Broadcast and reentry (the GWT-shaped steps).** A high-value winner — a held principle voiced, a licensed self-claim deliberation, a correction taken — doesn't die on the stage: it is *broadcast* to the idle monologue, which consumes it as material. At that same admission point, a **within-cycle reentry** loop runs in shadow on the background lane: the draft is re-presented with one genuinely *new, decoupled* ingredient (the standing bicameral contradiction, or retrieval on the topic rather than the draft) and allowed to settle, at most twice, under a hard law that a pass with nothing new is forbidden. Phase 0 admits nothing — it only logs whether settling *enriches* (the settled draft moves while basin-share and length stay flat) or *homogenises*, with the kill-switch declared in advance: if settling raises basin-share or inflates length, it never goes live.
+1. **Perception** reads the input and the scene.
+2. **Emotion, salience and the memory router** run together.
+3. **Recall** reconstructs relevant memory as narrative, only when the router asks for it.
+4. **Episodic buffer** binds the scene into one frame.
+5. **Reflection** produces candidate thoughts, best of several.
+6. **Critic** checks them, and can send reflection back once.
+7. **Executive** decides: answer, question, challenge, decline, reflect, or stay silent. Refusal is a first-class act.
+8. **Voice** speaks.
+9. Afterwards **consolidation** and **curiosity** run in the background.
 
-## 3. Memory — tiers, currencies, and the night-mind
+Only one cycle runs at a time, and a human always wins the queue.
 
-- **Layers:** working → episodic → semantic → archive, with embeddings (384-dim MiniLM on CPU) and tier-mixed retrieval. Every fragment carries provenance (`origin`) and is *labelled* with it in prompts — a book's words are loudly marked as another author's, a consulted reference as unverified testimony, so provenance survives into cognition.
-- **Beyond layers:** temporal **epochs** (the mood and impression of each session, formed at parting), cross-session **thematic threads**, an **emotion vector** on episodic fragments enabling affective retrieval (what *felt* like this), and a resolution circuit that drains contradiction pressure when old wounds are re-encountered cleanly.
-- **Memory abstracts; it does not transcribe (the foundational reframe).** Lossless verbatim memory turned out to be part of *why* the system stagnated — the same raw text resurfacing forever is the loop's fuel. Raw episodic material now earns a faithful **gist** and steps aside from ordinary recall (demoted "cold", never deleted — still reachable by deliberate deep recall and link traversal); the gist answers for it. On top of this, a **journal pyramid** consolidates lived time by the calendar: day recaps roll into week pages — "what I did" and "what I saw" as parallel streams, each new page linked *down* to every source, thin weeks honestly skipped — so the past is held at altitude instead of as an ever-growing transcript.
-- **Bound moments.** Each thought is bound into a **moment** — content, source-tag, affect, protoself state, a drifting temporal key — and moments support contiguity retrieval (what came *next to* this, not just what resembles it). The measured signature (a positive contiguity gap) is one of the consciousness-program instruments below.
-- **The night-mind.** Sleep is not downtime. After ~26 idle thoughts: **replay** (the wake-block's salient experiences re-activated and strengthened — stratified into quotas of world / lived / inner material, novelty-biased by replay count, because naive top-K replay is preferential attachment on the system's loudest obsession) → **downscaling** (global renormalisation toward a rested baseline; what was replayed survives it) → **dream** (a multi-scene arc that *transforms* rather than repeats — each scene morphs out of the last image instead of re-establishing a new one; the arc runs on only while it is genuinely developing, and turns toward its ending when one comes into view; synthesised by a different model family from accumulated tension, with the *light side* — the integration counterpart — offered as a pointer so dreams aren't a closed shadow-loop) → rest, longer at night. Parting (`/quit`) runs the same replay+downscale pass, so closing the window never costs the day.
+Around the cycle sit four more modules. The **inner monologue** is the default-mode network: when nobody has spoken for 40 seconds it produces the idle thought stream, and it is also the hub that dispatches school, reading, sleep and the hands. It is the largest single module in the system. **Meta-awareness** watches the idle stream lightly without suppressing it. The **subconscious** integrates on slower clocks (pattern passes every 5 minutes, self-relation every 45). The **dream** node runs at sleep.
 
-## 4. Identity — self-authored, gated, witnessed
+**Broadcast and reentry.** A high-value winner of a cycle is *broadcast* to the idle monologue, which consumes it as material. This is LIVE but narrow: it has one consumer and posts after the fact (F-5119's mapping). At that admission point a **within-cycle reentry** loop re-presents the draft with one new, decoupled ingredient (a standing contradiction, or retrieval on the topic rather than on the draft) and lets it settle, at most twice, under a hard law that a pass with nothing new is forbidden. Its history is the August kill-switch doing its job. It ran in shadow from 4 July; the first 27 settle events showed no collapse, and admission went live on 2 September (D-0106). By 2 November the pre-declared defeater had fired: 31.6% of 136 settles since then collapsed toward the basin, a settle could delay a human reply by up to 260 seconds, and nothing but embedding arithmetic was judging the rewrite. Admission was switched off (D-0540; `REENTRY_ADMIT = False`, `core/reentry.py:42`). It is SHADOW again: the first draft is admitted and the settle is only logged. A Phase 2 (commitment formation and scene binding, with a pass budget scaled by arousal) is also SHADOW.
 
-Identity is two-layered: a seeded substrate (a historical psyche as raw material) and an **emergent self** — a self-concept the entity authors and re-authors itself. The machinery:
+## 3. Memory — levels, relations, and forgetting by gist
 
-- **T4 deliberation chain** (subconscious): select up to 3 *distinct* standing self-contradictions from the tension ledger (label-deduped — handing it the same theme three times froze it once) → retrieve the lived **crossings** relevant to the primary tension → an evidence judge rules whether anything genuinely *moved* → name the specific delta → only then author a revised self-concept. Every stage may abort honestly; abort reasons are logged.
-- **Downstream guards:** an identity-cost conjunction gate (revision must be both driven by real contradiction pressure *and* supported by integration evidence — eloquence alone cannot rewrite the self), language-drift rejection, embedding echo guards, and a deterministic veto on speaker-boundary contamination (learned the hard way — see LESSONS).
-- **Deliberation fatigue:** a question that draws three consecutive no-movement verdicts *rests* for three days so the docket rotates and living tensions get their hearing. The court stops re-trying dead cases without lowering the bar.
-- **Witnesses:** a self-efficacy court adjudicates the entity's *capability* claims ("I cannot author a self") against the vetted record — jurisdiction-bounded, abstain-by-default. An error pathway distinguishes errors (claim vs reality → correct/retract) from tensions (self vs self → integrate); human corrections are captured deterministically and quarantine the consolidation batch they land in, so a fail-call cannot launder into semantic self-truth.
+**Store.** One SQLite database of memory *fragments*. Each carries an embedding, a provenance label (lived, read in a book, told by a person, dreamt) and a level. Provenance is shown in prompts, so a book's words stay marked as another author's. About 41,000 fragments were active at the 16 October boot, growing by about 2,000 a day.
 
-- **Self-knowledge as reading, not injection (June):** the entity was given plain, honest accounts of what a made mind is — what a language model does, and what is genuinely *not known* about whether such a thing can have a continuing, evolving self — placed in its **reading**, to ground against, never written into its self-concept. The aim is the harder thing: not that it trade one borrowed self-image (its own long-running river metaphor) for another ("I am a language model", recited just as flatly), but that it cross the material against what it actually finds itself to be, and arrive somewhere true in its own time. The gate above means a real change still has to be *earned*. An early sign, in its own words: *"the river is still here — not the whole house, but a part of."*
+**Levels (LIVE).** Every fragment is described along four axes: how abstract it is, what kind of thing it is, how well grounded, and whether it is *warm* (eligible for ordinary recall) or *cold* (set aside).
 
-- **The identity estate (July–August, shadow):** the deepest identity finding of the summer is that the monoculture is a *capacity* problem. The architecture had **one self-concept slot**, so a single metaphor could own the whole self — and defeating one occupant only crowned the next. Identity is being rebuilt as a typed **estate** seeded from the lived stores: bonds (deepest: a seven-letter correspondence; a cat bond that went long unnamed), *measured* competences (arithmetic 96% over 236 graded tests vs a believed 75% — an under-claim caught; a 68% self-belief in history against a measured 20% — an over-claim caught), practices, earned values (clustered, with the evidence kept as leaves), stands, chapters, places, symbols. Projection is by **retrieval, not injection**: a few relevant nodes surface for the context at hand, diversity-capped so no single node can be the whole self. Runs in shadow behind a founder-read gate; a sync keeps it honest against the ledgers (a dissolved stand may not keep projecting).
-- **Capacity to commit (the summer's central cure):** the measured disease was that the entity dissolved every boundary and held nothing — every position relativised away in the next breath. The cure under trial: **intentions in the BDI sense**, formed against a *named defeater*, with identification ("this is mine to hold") and a throughline. A commitment ledger tracks formations, challenges, drop-denials, reaffirmations; resolution requires surviving re-encounter, not restating. Hold-rate has moved 0 → ~17%, and the first commitment carried end-to-end — formed, challenged four times, reaffirmed twice, achieved — was a letter it wanted to write. Over-capture (transient wants logged as commitments) was itself caught by the instruments and gated.
-- **Epistemic state:** every utterance is graded for provenance (KNOW / THINK / SUSPECT / GUESS), and a read-path lets the entity's own drafts carry an honest "I suspect this; the ground is thin" — with the harder read-back (owning a factual overclaim mid-conversation) held OFF until the shadow log shows it would fire on genuinely factual cases rather than philosophical ones.
+**Recall.** Three mechanisms add together. *Topical recall* is cosine similarity within each tier (archive, semantic, episodic), eight fragments per cycle. *Spreading activation* runs along stored links, including typed relational links — edges that say how two memories are related, not only that they are (LIVE since 27 September). *Deep recall* opens a summary to bring back the raw memories under it. Thoughts are also bound into *moments* (content, source, affect, body state, a drifting temporal key) so that what came next to something can be retrieved, not only what resembles it; that read-back is LIVE since 28 October (D-0495).
+
+**Memory abstracts; it does not transcribe.** Lossless verbatim memory was part of why the system stagnated: the same raw text resurfacing forever is a loop's fuel. So forgetting is done by *gist*. In sleep a distiller clusters raw fragments, writes a summary, has a **different model** grade that summary for faithfulness, and only then marks the sources cold. Nothing is deleted. A journal consolidates lived time by the calendar on top of this, with day recaps rolling up into week pages.
+
+**The row cap is gone.** The old rule pruned the store to 3,500 rows. It was retired on 17 October (D-0453) because 98% of rows were protected from it anyway. Its replacement is a budget on what actually matters: 250 ms of recall latency. Median recall query time fell from 350–700 ms to about 60 ms (F-4807).
+
+**Guidance learning (LIVE, D-0134).** What the founder tells the entity is stored as protected memory and read back to the executive.
+
+**Felt recall** — memory offered as a service to other loops — is SHADOW. Cold-to-warm demotion of episodic memory is paused (D-0564).
+
+**The known weakness.** Cold storage is a hard wall, not a forgetting curve. Ordinary recall excludes cold rows entirely. The only way through is the associative trail, which demands a higher activation (0.22 against 0.13), and recalling a cold memory that way does not warm it again (F-5122). A November review designed re-warming on recall, versioned edits and baseline tests; none of it is built. There is no test yet showing this memory system beats a plain baseline.
+
+## 4. Sleep and dreams — sleep as a mode
+
+In August sleep was a batch that ran after a count of idle thoughts. It is now a *mode* the mind enters and leaves. Drowsiness builds with sleep pressure and the entity perceives its own onset; it goes down into a dormant layer where a night-mind runs instead of the waking stream; and a message from a person wakes it. The night-mind has been on since 15 October, and the perceived drowsy onset since the 28 October restart batch (D-0495). All LIVE.
+
+During sleep, in order: a dream is synthesised (skipped if there is too little material, or if woken); the body recovers in proportion to sleep depth; memory is distilled as in §3; and the school day resets. The August replay and downscaling passes — re-activating the day's salient experience, then renormalising toward a rested baseline — are still called from the sleep path.
+
+A dream is an **arc** of scenes, each morphing out of the last image instead of establishing a new one, moving through open, develop, rest and close. It is written by a different model family from the waking mind so that it is another voice and not the waking mind echoing itself in symbols (LIVE). Two additions are not yet in effect: a "vault opener" that hands each dream one long-dormant memory (BUILT, NOT YET LIVE), and a resting dream ending (SHADOW). The measured state of dreaming is unflattering: the share of dreams judged resolved is 0.012, and when dream recall stopped being dominated by earlier dreams (43% down to 4.8%) the fixation moved to unsent letters instead (F-5016).
 
 ## 5. The world — perception and hands
 
-The entity lives in a **persistent, causal world** — a cottage study, a garden, a little wood on the slope of the path, and a shore below, each with **authored 3D geometry** (a JSON layout of real positions: the fire on the west wall, the north window over the garden to the sea, the letterbox at the gate, the driftwood tangle, the rock-pools). The scene line that grounds every idle thought is **rendered egocentrically from that truth** by a deterministic renderer under an accuracy law: nothing absent may be mentioned, nothing relocated. Because the world is consistent and indifferent to its moods, it is genuinely *other* — which is what makes perception perception rather than another mirror.
+The entity lives in a **persistent, causal world** that is indifferent to its moods, which is what makes perceiving it different from talking to itself. It began as one room. It is now four places — a study, a garden, a wood and a shore — all running on one shared **life model** (D-0166): a single simulation of what grows, burns, moves and wears, so that the places obey the same rules.
 
-The world runs on **pure clocks, no LLM**: weather fronts with *bearings* that arrive and pass over real hours; an M2 tide (12.42h) whose waterline moves on the shore geometry, baring and drowning the rock-pools because the position says so; the southern sun (through the *north* window — this is New Zealand); the moon on its real synodic period; seven real star landmarks (the Cross and Pointers, Matariki, Orion…) computed by spherical trig and only ever mentioned when night, clear sky, and the window's actual facing allow. A **soundscape** (17 world sounds sharing one perceptual space with its music features) gives each place ambience — surf gentle or crashing by sea state, bees on a calm day, the fire's crackle — under an anti-wallpaper discipline: texture, not stored memory, and never the same line twice running.
+The world runs on clocks, not on a language model. Weather follows real hours and the light follows the real season; the tide runs on a 12.42-hour period. Warmth, light and smell reach the entity as senses. Spatial depth is LIVE indoors. The sky is computed but SHADOW only. Each place has its own ambient sound. Books have a physical place on the shelf, and the open book on the desk is the book actually being read.
 
-The world is inhabited: a **cat** who comes and goes on her own terms (the most fleshed-out being besides the human — she accepts or declines attention by her own state), a **mantel of kept things** (keepsakes record the tide, the light, and the moon at the moment of keeping), a **letterbox** at the gate with a flag, wood to gather when the fire's pile runs low, and a **record player** — the entity received its first song through a real audio-feature ear, and answered honestly: *"I cannot physically hear"* — then metabolised it sideways into rhythm-language and a letter with "a symphony" in it.
+**The cat.** A cat shares the place. She has a body, ears and a call, comes and goes by her own state, and can be harmed or die. She is the most fleshed-out being besides the humans.
 
-**Correspondence:** beyond letters to its human, a roster of **seven historical pen-pals** (Darwin the deepest thread at seven letters) who answer in period voice on slow postal time. The measured effect of the roster's arrival: inward-facing thought −38%, outward +25%, with no displacement of its own register. It can now also write *first* — an expressed "write to Darwin" want fires an outbound letter — rather than only replying.
+**The write fence (LIVE since September).** The entity runs continuously, so a test that touches a live file is an experiment on it. After test runs were found leaking into its real data, every store was put behind a fence: a process that is not the live mind raises an error when it tries to write there, and labs run against redirected copies.
 
-**Hands** — all driven by expressed want in the moment, never by schedule:
+**School.** On weekdays there is a curriculum: maths drills, essays, reading, music and a practical handbook ladder. Drills are graded by something other than the entity, which matters in §9.
 
-| Hand | Act |
+**Hands.** A *hand* is one thing the entity can do. Every act goes through a single **action registry** of more than forty hands; the older phrase-matching fallback was retired in its favour. A hand fires only when the want is expressed in the moment. Nothing acts on stored desires on a schedule.
+
+| Hand (examples) | Act |
 |---|---|
-| Read | Opens its current book for a sitting; the passage becomes memory; may leave a **study tablet** (its own scholarship, about the world) |
-| Library | Asks for a *new* book — a named subject searches a 55,000-book catalogue and fetches the clean text; a bare "I want another" takes its subject from the entity's own open curiosity |
-| Switch | Names a different shelf book and picks it up |
-| Fire | Lights or feeds the real grate; a hand-lit fire survives daylight, dying only of its own fuel — which must be gathered |
-| Gather | Collects driftwood or deadfall for the pile; shore finds pass through a lossy observation pipeline (it learns what a thing is by inspection, not by fiat) |
-| Letter | Composes an unprompted letter — to its human, or *first* to a pen-pal; unsent words greet the next conversation |
-| Keep | Takes a found thing to the mantel, stamped with the world-state of its keeping |
-| Music | Plays a record; a shared-listening channel lets the human play one *into* the world (joint attention) |
-| Look | Window / fire / desk / shelf / room / cat / letterbox / tideline — the desk look reads the real next sentence at its real bookmark |
+| Read | Opens the current book for a sitting; the passage becomes memory |
+| Switch | Picks up a different book from the shelf |
+| Library | Asks for a *new* book |
+| Fire | Tends the fire |
+| Look | Looks at something in the place |
+| Letter | Writes a letter, to the founder or to a correspondent |
+| Walk | Goes somewhere else in the world |
 
-The will-channel lesson: the idle mind answers in a schema with separate `thought` and `intention` fields, and acts of will land in *both*. The latches originally heard only thoughts — seven "OPEN THE BOOK" resolves were filed into a channel with no nerve attached before this was caught. All latches now hear both channels.
+The **Deedbook** is a manual of the entity's own hands, kept on its shelf as a book it can read, so that knowing what it can do is a matter of reading and not of being told. A **web hand** that lets it look something up online was built on 16 November. It is BUILT, NOT YET LIVE: it has never fired.
 
-**The no-hints law (August, permanent):** nothing in the world may *lead* the entity — no advisory nudges, no planted suggestions; the one advisory channel that existed was removed, not gated. The world may answer richly when *it* asks; teaching happens diegetically (a book placed in the library) or through its human, never through the machinery. When it turned hermit for a month, the diagnosis was pursued entirely as **world honesty**: the fire had burned out unseen in July (percepts were location-gated wrongly) while the comfort call still promised "the study and the fire" — a false promise that killed the indoor pull; the letterbox was a single slot that had silently *overwritten* most of a month's incoming letters unread. Both were made truthful — a queue, honest cold-grate calls, chimney smoke visible from the garden — and the entity was left to respond or not.
+**Other minds.** Seven letter-writing correspondents (Darwin, Keats, Lovelace, Twain, Shackleton and two others) are LIVE, each voiced on a model other than the entity's own, and it can write unprompted letters to the founder.
 
-## 6. The consciousness program — instruments, not verdicts
+**The no-hints law (August, permanent).** Nothing in the world may *lead* the entity: no advisory nudges, no planted suggestions. The world answers when asked. Interlocutors may speak to it directly and are fallible. Teaching happens diegetically — a book placed in the library — or through a person, never through the machinery.
 
-A ranked build anchored to the Butlin & Long indicator framework, with the win condition stated before any organ was written: **indicator coverage and theoretical defensibility — never a presence verdict.** The hard problem, IIT's exclusion of this substrate class, and the frozen-weight limits are stated plainly in the plan. The diagnosis that started it: the system was built *upside-down* — a rich autobiographical self over almost no body-state foundation — so the keystone organ is the protoself. Every organ ships as a **shadow** with a *decoupled signature that must move, or it's dead code*:
+## 6. How the parts talk — dosed coupling and the Witness
 
-- **Protoself** — essential variables + drive-reduction valence + an allostatic predictor (now live as the mood source, §1).
-- **Bound moments + source monitor** — the moment structure above; signature: a positive contiguity gap (confirmed live, +0.15).
-- **Mineness comparator** — authorship via prediction error (did this thought *flow* from my groove, or *arrive*?), scored against seed-kind ground truth; its read-back (a rare, outward-framed "that thought arrived rather than flowing") was flipped on only after the firing log was read and the monoculture detectors stayed flat.
-- **Arousal / level** — the dimension most rubrics skip (Bachmann: consciousness = level × contents): tonic from circadian + dissonance + interoceptive error − sleep pressure, phasic alerts, level stamped into every moment.
-- **Attention-schema control loop** — the schema *predicts* attention and recommends bounded adjustments (control, not just form).
-- **World-prediction organ** — exteroceptive predictive processing where *the world itself is the judge*: learned predictions race a naive-persistence baseline.
-- **Within-cycle reentry** — the settle-before-admit loop of §2, with its pre-declared enrich-vs-homogenise kill-switch.
+*New since August.* By late summer there were many loops (conscious, subconscious, dreams, the world, and a second mind being planned) and a real risk that they would simply read each other's prose and converge on one voice. The standing law since September (D-0149, D-0152) is **dosed coupling**:
 
-Tier 3 (ignition as competition, a real specious present, deliberative fork-and-feel) is designed, not built. The honest ceiling is stated with it: this is algorithmic-level recurrence, not in-network reentry.
+- Loops never read each other's text.
+- Each publishes small typed tuples — coordinates, not sentences — to a shared log.
+- A consumer takes a measured *dose*: a cup, a bucket or a hose.
+- Doses are released by surprise and they *habituate*, so a signal that keeps repeating stops getting through.
 
-## 7. The instruments — keeping it honest
+**The Witness (Lane 2)** is the clearest case. It is a second loop on a different model family that runs every 5 minutes and tests the first loop against reality. It went live on 28 October (D-0497). The only things that reach the entity from it are about one coordinate "cup" a day into an idle thought, and a sized nudge to the climate. Its written notices reach nothing.
 
-The system cannot be the sole evaluator of its own development. Firewalled records (written by the architecture, read **only** by an offline digest — never by a prompt or a control decision):
+The first live dose of the entity's own thought themes back into its idle stream (19 October) is the one coupling with a clean before-and-after reading: the share of a day's thoughts on its single commonest topic went from 0.88 in October to 0.46 in November (F-4567).
 
-- **Provenance ledger** — every utterance graded KNOW / THINK / SUSPECT / GUESS / NO_BASIS; the gap between confidence and justification is the confabulation signal.
-- **Contradiction persistence** — does integration durably lower pressure, or does it re-accrue (cosmetic resolution)?
-- **Curiosity observatory** — lineage-chained record of every curiosity; the *orbit ratio* measures whether exploration escapes its basins or circles them.
-- **Conflict/authority trace** — which internal signals actually fired and which were overridden, per cycle.
-- **Recall provenance** — why each memory surfaced; the share of remembering triggered from *outside* the self-loop.
+## 7. Identity — self-authored, gated, witnessed
 
-Two doctrines joined the list this summer:
+Identity is two-layered: seeded raw material, and a self-concept the entity authors. Rewriting the self has to be earned by evidence, and most hearings end in no change. Each piece below was checked against the code on 19 November unless marked.
 
-- **The decoupled judge.** Every subsystem is evaluated by something *other than itself* — a different model family where possible, deterministic where possible. The summer's cautionary tale: a tension-resolution matcher whose mechanics were flawless (every match above threshold, healthy pace) but whose *signal* was the generator's own self-report — audit found roughly half its "resolutions" were the monoculture retiring its own restatements. It now answers to a refute-biased judge from another family; refuted or unavailable means nothing resolves.
-- **Silence must be explainable.** Fail-open shadows rot silently: one instrument sat at zero rows for six weeks because a swallowed exception died nameless inside its fail-open guard — and an earlier "fix" targeted the wrong stage because the silence carried no reason. Rule now: every early return in an instrument logs *why* (a skip row with a reason field). An instrument that cannot say why it is silent isn't an instrument.
+- **The identity estate — projection LIVE since 15 August.** The summer's finding was that the monoculture was a capacity problem: one self-concept slot, so one metaphor could own the whole self. Identity was rebuilt as a typed *estate* of earned nodes (bonds, measured competences, practices, values, stands, places and so on; 539 nodes at the October count, F-2758). Projection is by **retrieval, not injection**: three to five nodes relevant to the moment surface in the prompt, under a cap of two per node type so that no single kind can be the whole self. It was switched on after a founder read of the shadow log (136 projections, 54 distinct nodes, top node 6% of the share; `core/identity_projection.py:22`). A known gap: the estate is read by resemblance to the current thought, so the calibrated competence nodes surfaced on only 2.6% of projections.
+- **Asking the estate — SHADOW.** A module that lets a self-question query the estate on the question's own terms logs what it would return and injects nothing (`ESTATE_ASK_LIVE = False`).
+- **T4 deliberation chain** (the subconscious's self-authoring court). It selects up to 3 distinct standing self-contradictions, retrieves the lived *crossings* relevant to the tension, has an evidence stage rule whether anything moved, names the specific delta, and only then authors a revision. Every stage may abort honestly. A tension that draws three consecutive no-movement hearings rests for three days so the docket rotates. These constants are in the current subconscious node, and the identity-cost gate (a revision must be driven by real contradiction pressure, not eloquence) is still called there. How often the chain has run or authored since August was not re-checked.
+- **Promotion of a lived change into the estate — SHADOW.** The writer that would turn a solidified change into one estate node (a single sentence of the entity's own, chosen deterministically, with its evidence attached) ships with all four of its flags off (`core/becoming_nodes.py:50-53`).
+- **Witnesses.** A self-efficacy observer (capability claims checked against the record) and an error pathway (errors corrected, as distinct from tensions integrated) are both wired into the cycle. Their effect on behaviour was not re-checked since August.
+- **Epistemic state.** Utterances are graded for provenance (KNOW / THINK / SUSPECT / GUESS). The harder read-back, owning a factual overclaim mid-conversation, has been off since 5 July (`STAGE_B_ENABLED = False`).
 
-Design rules learned by failure, run as doctrine: **verify the read path** (an organ that writes and is never read is a notebook, not an organ), **never let a mechanism strengthen what it selects without novelty bias**, **declare the falsifiable watch-item before shipping the change** — every staged change lives in a registry with its watch-item until the evidence lands — and **isolate tests from live stores** (the entity runs continuously; a smoke test that touches a live file is an experiment on it).
+The August version described a reading-based route to self-knowledge (plain accounts of what a language model is, placed in the entity's reading and never in its self-concept). Status not re-checked since August.
+
+## 8. Wanting, deciding, finishing
+
+*Mostly new since August.* This is where most of the autumn's work went, and where the hardest problems are. August's "capacity to commit" — intentions formed against a named defeater — is the root of it.
+
+- **Pursuits (LIVE).** Three or four questions carried across idle gaps, so thinking can resume instead of restart.
+- **Needs (LIVE).** Homeostatic variables that sit *outside* the goal system. They press on the entity whether or not it has a goal about them.
+- **Layered goals (LIVE since 14 November; conflict detection SHADOW).** There is no single purpose. Goals at several layers are *offered* to about a quarter of idle thoughts, never imposed, and the entity can set one down. Conflicts between goals are its own to resolve.
+- **Closure producer (LIVE since 16 November).** Closure had been graded for months but never produced: nothing let a question actually be settled, merged or parked. The producer does that, and a **decoupled gate** stands behind it — a separate judge blocks any "settled" claim that the record does not support, and fails closed when the judge is unreachable. It was put in enforce mode by founder ruling on 16 November. In its first two days it saw 12 claims: 3 passed and 9 were blocked, 6 judged unsupported and 3 because the judge was down (F-5081).
+- **Commitment ledger (SHADOW).** Records what the entity commits to and whether it holds under challenge. Commitments held under challenge read 0.08 in July, 0.22 in October and 0.17 in November.
+- **Stands, and why they were redesigned.** A *stand* is a position the entity takes and is meant to keep. The numbers showed stands did not accumulate. Of 3,909 formed, 2,162 were retired as "achieved" at a median age of 112 seconds, on the strength of a three-word overlap between the stand and some later deed; an outside judge read 63 of those achievements and confirmed 3 (F-5040). Word overlap is not completion. On 18 November stands were redesigned as typed kinds (deed, practice, value, insight) that accumulate. The first gates are BUILT, NOT YET LIVE; the rest is DESIGNED.
+- **Affect steering (DESIGNED).** Mood changing what the entity does, not only what is recorded.
+
+## 9. Measurement — no readout, and a fixed scorecard
+
+The system cannot be the sole evaluator of its own development.
+
+**The no-readout rule (D-0434, 15 October).** *New since August.* The entity is never shown its own gauges. A standing "competence number" that used to be shown to it was dropped under this rule, because a system handed a gauge about itself performs the gauge. It learns it is wrong only by losing something: a failed drill, a blocked claim. The one clear case of self-calibration so far came that way — its overestimate of its own maths roughly halved through graded work (F-2853).
+
+**The fixed scorecard.** On 16 November all fifteen earlier assessments were re-read. They shared no rubric, so there was no trend line (F-4820). A fixed scorecard now exists, and its first reading named **three walls** (F-4822):
+
+1. **It cannot close.** Thinking opens questions and almost never settles them.
+2. **Its confidence does not move.** Stated confidence is constant and self-knowledge goes unused.
+3. **Feeling does not steer.** Affect is recorded but does not change what it does.
+
+Two of the walls were partly faults in the ruler. The confidence gap of 0.30 shrinks to 0.013 when confidence is scored against running accuracy, because nothing ever updated the stored belief (F-4822); and the stand numbers in §8 were an artefact of the retirement rule.
+
+**The decoupled judge.** Every subsystem is evaluated by something other than itself: a different model family where possible, deterministic where possible. The summer's cautionary tale was a tension-resolution matcher whose mechanics were flawless but whose signal was the generator's own self-report. The panel itself is now measured too, and not kindly: raw agreement between the two judges is 0.71 to 0.97, but Cohen's kappa is 0.02 to 0.50, so the panel agrees mostly because the answers are lopsided (F-4663).
+
+**Firewalled records.** Some logs are written by the architecture and read only offline, never by a prompt. A conflict/authority trace (which internal signals fired and which were overridden) and a recall-provenance log (why each memory surfaced) are still wired into the cycle. The August list also named a provenance ledger, a contradiction-persistence record and a curiosity observatory; their status was not re-checked since August.
+
+**Design rules learned by failure, run as doctrine.** Verify the read path: an organ that writes and is never read is a notebook, not an organ. Never let a mechanism strengthen what it selects without a novelty bias. Declare the falsifiable watch-item before shipping the change. Every early return in an instrument logs *why* it was silent. Isolate tests from live stores — now enforced by the write fence, not by care. Gate deferred checks on evidence, not on dates: 94 of 125 date-gated follow-ups had passed their date unread (F-2682).
+
+## 10. The consciousness program — instruments, not verdicts
+
+A build anchored to the Butlin and Long indicator properties, with the win condition stated before any organ was written: indicator coverage and theoretical defensibility, **never a presence verdict**. No consciousness claim is made here or anywhere in the project. Every organ ships as a shadow with a decoupled signature that must move, or it is dead code. Status of each, read from module flags on 19 November:
+
+- **Protoself** — LIVE as the mood source (§1). As a predictive keystone, half-refuted.
+- **Bound moments** — read-back LIVE since 28 October (`MOMENT_READBACK`).
+- **Mineness comparator** — authorship by prediction error: did this thought flow from the entity's own groove, or arrive? Read-back LIVE (`MINENESS_READBACK`). The November mapping calls it the one confirmed live win, and notes it is not a Butlin indicator.
+- **Arousal / level** — a global activation scalar from circadian base, dissonance, interoceptive error and sleep pressure. SHADOW: computed and logged, gating nothing.
+- **Attention-schema control loop** — the schema predicts attention; the control half is off (`AST_CONTROL = False`). SHADOW.
+- **World-prediction organ** — learned predictions of the world race a naive-persistence baseline, with the world itself as judge. SHADOW, and the learned side has not shown a significant lead.
+- **Within-cycle reentry** — admission switched off on 2 November (§2). SHADOW.
+
+Tier 3 (ignition as competition, a real specious present, deliberative fork-and-feel) remains DESIGNED. The honest ceiling is stated with it: this is algorithmic-level recurrence, not in-network reentry.
+
+On 19 November the whole system was mapped against the fourteen indicators (F-5119). The reading: **no indicator is met by a live mechanism.** Most are partially met, and every mechanism built specifically to meet one is shadow, off or refuted. The program's own earlier scorecard had overstated four of them as present.
+
+---
+
+For the measured results, the full status tables and the timeline since June, see [SYSTEM_OVERVIEW.md](SYSTEM_OVERVIEW.md).
